@@ -2,8 +2,17 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Subir video a DECOM</title>
+
+    <!-- Google Font Luckiest Guy -->
+    <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet" />
+
     <style>
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         margin: 0;
         font-family: "Segoe UI", sans-serif;
@@ -20,52 +29,57 @@
         height: auto;
         display: block;
         object-fit: cover;
-        margin-bottom: 0;
       }
 
       main {
-        max-width: 600px;
+        max-width: 1200px;
+        width: 95%;
         margin: 40px auto;
         background-color: #fff;
-        border-radius: 12px;
+        border-radius: 14px;
         padding: 40px 30px;
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
         text-align: center;
-        font-size: 18px;
       }
 
       h2 {
-        font-size: 32px;
-        margin-bottom: 30px;
+        font-family: 'Luckiest Guy', cursive;
+        font-size: 38px;
+        margin-bottom: 35px;
         color: #2b6cb0;
+        letter-spacing: 1px;
       }
 
       input[type="file"] {
-        padding: 14px;
+        padding: 18px;
         font-size: 18px;
         width: 100%;
+        border-radius: 10px;
         margin-bottom: 25px;
+        border: 2px dashed #90cdf4;
+        background-color: #ebf8ff;
       }
 
       button {
-        padding: 14px 20px;
-        font-size: 18px;
+        padding: 16px 24px;
+        font-size: 20px;
         background-color: #2b6cb0;
         color: white;
         border: none;
-        border-radius: 8px;
+        border-radius: 10px;
         cursor: pointer;
         width: 100%;
-        transition: background-color 0.3s ease;
+        margin-bottom: 15px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
       }
 
       button:hover {
         background-color: #2c5282;
+        transform: scale(1.02);
       }
 
       #copyButton {
         background-color: #38a169;
-        margin-top: 15px;
       }
 
       #copyButton:hover {
@@ -74,7 +88,6 @@
 
       #retryButton {
         background-color: #e53e3e;
-        margin-top: 15px;
         display: none;
       }
 
@@ -115,14 +128,30 @@
         margin-top: 30px;
         background-color: #edf2f7;
         padding: 20px;
-        border-radius: 8px;
-        line-height: 1.5;
+        border-radius: 10px;
+        line-height: 1.6;
       }
 
       a {
         color: #2b6cb0;
         word-break: break-word;
         font-size: 14px;
+      }
+
+      @media (max-width: 600px) {
+        h2 {
+          font-size: 28px;
+        }
+
+        button {
+          font-size: 18px;
+          padding: 14px;
+        }
+
+        input[type="file"] {
+          font-size: 16px;
+          padding: 14px;
+        }
       }
     </style>
   </head>
@@ -145,6 +174,7 @@
       </div>
 
       <div id="status"></div>
+
       <button id="copyButton" onclick="copiar()">📋 Copiar link directo</button>
       <button id="retryButton" onclick="upload()">🔁 Reintentar</button>
 
