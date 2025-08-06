@@ -31,7 +31,7 @@
         max-height: 200px;
         z-index: 2;
         text-align: center;
-        background-color: white;
+        background-color: transparent;
       }
 
       .logo-container img {
@@ -61,14 +61,18 @@
       }
 
       input[type="file"] {
-        padding: 18px;
-        font-size: 18px;
-        width: 100%;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        border: 2px dashed #90cdf4;
-        background-color: #ebf8ff;
-      }
+  padding: 14px;
+  font-size: 17px;
+  width: 100%;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  border: 2px solid #90cdf4;
+  background-color: #ebf8ff;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 
       button {
         padding: 16px 24px;
@@ -272,3 +276,4 @@
     </script>
   </body>
 </html>
+
