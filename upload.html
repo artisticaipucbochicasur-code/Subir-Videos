@@ -70,6 +70,16 @@
         background-color: #2f855a;
       }
 
+      #retryButton {
+        background-color: #e53e3e;
+        margin-top: 15px;
+        display: none;
+      }
+
+      #retryButton:hover {
+        background-color: #c53030;
+      }
+
       #progressContainer {
         width: 100%;
         margin-top: 20px;
@@ -110,6 +120,7 @@
       a {
         color: #2b6cb0;
         word-break: break-all;
+        font-size: 12px;
       }
     </style>
   </head>
@@ -132,6 +143,7 @@
 
       <div id="status"></div>
       <button id="copyButton" onclick="copiar()">📋 Copiar link directo</button>
+      <button id="retryButton" onclick="upload()">🔁 Reintentar</button>
 
       <div class="note">
         🔄 Por favor, espera hasta que el video se suba completamente.<br /><br />
@@ -149,6 +161,10 @@
           alert("Selecciona un video primero.");
           return;
         }
+
+        document.getElementById("retryButton").style.display = "none";
+        document.getElementById("copyButton").style.display = "none";
+        document.getElementById("status").innerText = "";
 
         const identifier = "artistica_bochica_" + Date.now();
         const accessKey = "KPJmAQCm1UyNJWqv";
@@ -170,20 +186,21 @@
             const fileEncoded = encodeURIComponent(file.name);
             directLink = `https://archive.org/download/${identifier}/${fileEncoded}`;
 
-           document.getElementById("status").innerHTML = `
+            document.getElementById("status").innerHTML = `
               <p>✅ Subido correctamente.</p>
-             <a href="${directLink}" target="_blank" style="font-size: 14px; word-break: break-all; color: #2b6cb0;">🔗 Ver video</a>`;
+              <a href="${directLink}" target="_blank">🔗 Ver video</a>`;
 
             document.getElementById("copyButton").style.display = "inline-block";
+            document.getElementById("retryButton").style.display = "none";
           } else {
-            document.getElementById("status").innerText =
-              "❌ Error al subir: " + xhr.responseText;
+            document.getElementById("status").innerText = "❌ Error al subir: " + xhr.responseText;
+            document.getElementById("retryButton").style.display = "inline-block";
           }
         };
 
         xhr.onerror = function () {
-          document.getElementById("status").innerText =
-            "❌ Error de red al subir el archivo.";
+          document.getElementById("status").innerText = "❌ Error de red al subir el archivo.";
+          document.getElementById("retryButton").style.display = "inline-block";
         };
 
         xhr.open("PUT", url, true);
@@ -209,4 +226,3 @@
     </script>
   </body>
 </html>
-
