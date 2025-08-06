@@ -11,7 +11,7 @@
     </style>
   </head>
   <body>
-    <h2>Subir video a DECOM-DH</h2>
+    <h2>Subir video a DECOM</h2>
     <form id="uploadForm" method="POST" enctype="multipart/form-data" action="https://store10.gofile.io/uploadFile">
       <input type="file" name="file" accept="video/*" required />
       <input type="hidden" name="token" value="icoEBPihfwCSpUwviOv77DUO6GDxAJJa">
@@ -36,25 +36,11 @@
         .then(response => response.json())
         .then(data => {
           if (data.status === "ok") {
-            const code = data.data.code;
+            const link = data.data.downloadPage;
 
-            // 🔁 Esperar 1 segundo antes de pedir el link directo
-            setTimeout(() => {
-              fetch(`https://api.gofile.io/getContent?contentId=${code}`)
-                .then(res => res.json())
-                .then(contentData => {
-                  const contents = contentData.data.contents;
-                  const firstFile = Object.values(contents)[0];
-                  const link = firstFile.directLink;
-
-                  lastLink = link;
-                  document.getElementById("response").innerHTML = "<p>Subido correctamente:</p><a href='" + link + "' target='_blank'>" + link + "</a>";
-                  document.getElementById("copyButton").style.display = "inline-block";
-                })
-                .catch(() => {
-                  document.getElementById("response").innerText = "No se pudo obtener el link directo del archivo.";
-                });
-            }, 1000); // ⏱️ Espera de 1000 milisegundos (1 segundo)
+            lastLink = link;
+            document.getElementById("response").innerHTML = "<p>Subido correctamente:</p><a href='" + link + "' target='_blank'>" + link + "</a>";
+            document.getElementById("copyButton").style.display = "inline-block";
           } else {
             document.getElementById("response").innerText = "Error al subir: " + data.status;
           }
