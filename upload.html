@@ -2,60 +2,59 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Subir video a DECOM</title>
-    <style>
-      #copyButton {
-        display: none;
-        margin-top: 10px;
-      }
-    </style>
+    <title>Subir video a DECOM IPUC BOCHICA SUR</title>
   </head>
   <body>
-    <h2>Subir video a DECOM</h2>
-    <form id="uploadForm" method="POST" enctype="multipart/form-data" action="https://store10.gofile.io/uploadFile">
-      <input type="file" name="file" accept="video/*" required />
-      <input type="hidden" name="token" value="icoEBPihfwCSpUwviOv77DUO6GDxAJJa">
-      <br><br>
-      <input type="submit" value="Subir video" />
-    </form>
-    <div id="response"></div>
-    <button id="copyButton">📋 Copiar link</button>
+    <h2>Subir video a DECOM IPUC BOCHICA SUR</h2>
+    <input type="file" id="fileInput" accept="video/*" />
+    <br><br>
+    <button onclick="upload()">Subir video</button>
+    <div id="status"></div>
 
     <script>
-      let lastLink = "";
+      async function upload() {
+        const fileInput = document.getElementById('fileInput');
+        const file = fileInput.files[0];
+        if (!file) {
+          alert("Selecciona un video primero.");
+          return;
+        }
 
-      document.getElementById("uploadForm").onsubmit = function(event) {
-        event.preventDefault();
-        var form = document.getElementById("uploadForm");
-        var formData = new FormData(form);
+        const identifier = 'video_' + Date.now(); // ID único
+        const accessKey = 'eQc2fktg0PEYWqQh'; // <-- reemplaza esto
+        const secretKey = 'x4W4nohzqeIkcrPy'; // <-- reemplaza esto
 
-        fetch(form.action, {
-          method: "POST",
-          body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (data.status === "ok") {
-            const link = data.data.downloadPage;
+        const url = `https://s3.us.archive.org/${identifier}/${file.name}`;
 
-            lastLink = link;
-            document.getElementById("response").innerHTML = "<p>Subido correctamente:</p><a href='" + link + "' target='_blank'>" + link + "</a>";
-            document.getElementById("copyButton").style.display = "inline-block";
-          } else {
-            document.getElementById("response").innerText = "Error al subir: " + data.status;
+        const headers = new Headers();
+        headers.append('authorization', 'LOW ' + accessKey + ':' + secretKey);
+
+        const response = await fetch(url, {
+          method: 'PUT',
+          body: file,
+          headers: {
+            Authorization: `LOW ${accessKey}:${secretKey}`,
+            'x-archive-auto-make-bucket': '1',
+            'x-archive-meta-title': file.name,
+            'x-archive-meta-collection': 'opensource_movies',
+            'x-archive-meta-mediatype': 'movies',
+            'x-archive-meta-description': 'Subido desde App',
+            'Content-Type': file.type
           }
-        })
-        .catch(error => {
-          document.getElementById("response").innerText = "Error: " + error;
         });
-      };
 
-      document.getElementById("copyButton").onclick = function() {
-        if (!lastLink) return;
-        navigator.clipboard.writeText(lastLink)
-          .then(() => alert("✅ Link copiado al portapapeles"))
-          .catch(() => alert("❌ Error al copiar el link"));
-      };
+        if (response.ok) {
+          document.getElementById("status").innerHTML = `
+            <p>✅ Subido correctamente a Archive.org</p>
+            <a href="https://archive.org/details/${identifier}" target="_blank">
+              Ver video en Archive
+            </a>
+          `;
+        } else {
+          const text = await response.text();
+          document.getElementById("status").innerHTML = `<p>❌ Error: ${text}</p>`;
+        }
+      }
     </script>
   </body>
 </html>
