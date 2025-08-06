@@ -5,48 +5,65 @@
     <title>Subir video a DECOM</title>
     <style>
       body {
+        margin: 0;
         font-family: "Segoe UI", sans-serif;
-        background-color: #f4f4f4;
-        padding: 20px;
-        text-align: center;
+        background-color: #f0f4f8;
+        color: #333;
       }
 
-      h2 {
+      header {
+        background-color: #2b6cb0;
+        padding: 20px;
+        text-align: center;
+        color: white;
+      }
+
+      header img {
+        max-height: 60px;
+        margin-bottom: 10px;
+      }
+
+      header h1 {
+        margin: 10px 0 0;
         font-size: 28px;
-        margin-bottom: 30px;
-        color: #333;
+      }
+
+      main {
+        max-width: 500px;
+        margin: 30px auto;
+        background-color: #fff;
+        border-radius: 12px;
+        padding: 30px 25px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        text-align: center;
       }
 
       input[type="file"] {
         padding: 10px;
         font-size: 16px;
-        margin-bottom: 15px;
+        width: 100%;
+        margin-bottom: 20px;
       }
 
       button {
-        padding: 10px 20px;
+        padding: 12px 20px;
         font-size: 16px;
         background-color: #2b6cb0;
         color: white;
         border: none;
-        border-radius: 5px;
+        border-radius: 8px;
         cursor: pointer;
+        width: 100%;
+        transition: background-color 0.3s ease;
       }
 
       button:hover {
         background-color: #2c5282;
       }
 
-      #status {
-        margin-top: 20px;
-        font-size: 16px;
-        color: #444;
-      }
-
       #copyButton {
-        display: none;
-        margin-top: 15px;
         background-color: #38a169;
+        margin-top: 15px;
       }
 
       #copyButton:hover {
@@ -55,15 +72,14 @@
 
       #progressContainer {
         width: 100%;
-        max-width: 400px;
-        margin: 20px auto;
+        margin-top: 20px;
         display: none;
       }
 
       #progressBar {
         width: 100%;
         height: 20px;
-        background-color: #eee;
+        background-color: #e2e8f0;
         border-radius: 10px;
         overflow: hidden;
       }
@@ -74,24 +90,55 @@
         background-color: #3182ce;
         transition: width 0.3s ease;
       }
+
+      #status {
+        margin-top: 20px;
+        font-size: 15px;
+        color: #444;
+      }
+
+      .note {
+        font-size: 14px;
+        color: #555;
+        margin-top: 25px;
+        background-color: #edf2f7;
+        padding: 15px;
+        border-radius: 8px;
+        line-height: 1.5;
+      }
+
+      a {
+        color: #2b6cb0;
+        word-break: break-all;
+      }
     </style>
   </head>
 
   <body>
-    <h2>📤 Subir video a DECOM</h2>
+    <header>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Upload_alt_font_awesome.svg/512px-Upload_alt_font_awesome.svg.png" alt="Logo" />
+      <h1>DECOM - Subir Video</h1>
+    </header>
 
-    <input type="file" id="fileInput" accept="video/*" />
-    <br /><br />
-    <button onclick="upload()">Subir video</button>
+    <main>
+      <input type="file" id="fileInput" accept="video/*" />
+      <button onclick="upload()">📤 Subir video</button>
 
-    <div id="progressContainer">
-      <div id="progressBar">
-        <div id="progress"></div>
+      <div id="progressContainer">
+        <div id="progressBar">
+          <div id="progress"></div>
+        </div>
       </div>
-    </div>
 
-    <div id="status"></div>
-    <button id="copyButton" onclick="copiar()">📋 Copiar link directo</button>
+      <div id="status"></div>
+      <button id="copyButton" onclick="copiar()">📋 Copiar link directo</button>
+
+      <div class="note">
+        🔄 Por favor, espera hasta que el video se suba completamente.<br /><br />
+        📋 Una vez cargado, copia el link generado y pégalo en la <strong>descripción</strong> dentro de la app DECOM.<br /><br />
+        ✅ Luego presiona <strong>“Guardar Anuncio”</strong> en la app para finalizar.
+      </div>
+    </main>
 
     <script>
       let directLink = "";
@@ -129,12 +176,14 @@
             `;
             document.getElementById("copyButton").style.display = "inline-block";
           } else {
-            document.getElementById("status").innerText = "❌ Error al subir: " + xhr.responseText;
+            document.getElementById("status").innerText =
+              "❌ Error al subir: " + xhr.responseText;
           }
         };
 
         xhr.onerror = function () {
-          document.getElementById("status").innerText = "❌ Error de red al subir el archivo.";
+          document.getElementById("status").innerText =
+            "❌ Error de red al subir el archivo.";
         };
 
         xhr.open("PUT", url, true);
@@ -160,4 +209,3 @@
     </script>
   </body>
 </html>
-
