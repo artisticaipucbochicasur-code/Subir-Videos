@@ -12,46 +12,44 @@
       }
 
       header {
-        background-color: #2b6cb0;
-        padding: 20px;
         text-align: center;
-        color: white;
       }
 
       header img {
-  width: 100%;
-  height: auto;
-  max-height: none;
-  margin-bottom: 10px;
-  object-fit: cover;
-}
-
-
-      header h1 {
-        margin: 10px 0 0;
-        font-size: 28px;
+        width: 100%;
+        height: auto;
+        display: block;
+        object-fit: cover;
+        margin-bottom: 0;
       }
 
       main {
-        max-width: 500px;
-        margin: 30px auto;
+        max-width: 600px;
+        margin: 40px auto;
         background-color: #fff;
         border-radius: 12px;
-        padding: 30px 25px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        padding: 40px 30px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
         text-align: center;
+        font-size: 18px;
+      }
+
+      h2 {
+        font-size: 32px;
+        margin-bottom: 30px;
+        color: #2b6cb0;
       }
 
       input[type="file"] {
-        padding: 10px;
-        font-size: 16px;
+        padding: 14px;
+        font-size: 18px;
         width: 100%;
-        margin-bottom: 20px;
+        margin-bottom: 25px;
       }
 
       button {
-        padding: 12px 20px;
-        font-size: 16px;
+        padding: 14px 20px;
+        font-size: 18px;
         background-color: #2b6cb0;
         color: white;
         border: none;
@@ -86,13 +84,13 @@
 
       #progressContainer {
         width: 100%;
-        margin-top: 20px;
+        margin-top: 25px;
         display: none;
       }
 
       #progressBar {
         width: 100%;
-        height: 20px;
+        height: 22px;
         background-color: #e2e8f0;
         border-radius: 10px;
         overflow: hidden;
@@ -106,25 +104,25 @@
       }
 
       #status {
-        margin-top: 20px;
-        font-size: 15px;
+        margin-top: 25px;
+        font-size: 16px;
         color: #444;
       }
 
       .note {
-        font-size: 14px;
+        font-size: 16px;
         color: #555;
-        margin-top: 25px;
+        margin-top: 30px;
         background-color: #edf2f7;
-        padding: 15px;
+        padding: 20px;
         border-radius: 8px;
         line-height: 1.5;
       }
 
       a {
         color: #2b6cb0;
-        word-break: break-all;
-        font-size: 12px;
+        word-break: break-word;
+        font-size: 14px;
       }
     </style>
   </head>
@@ -132,10 +130,11 @@
   <body>
     <header>
       <img src="logo.png" alt="Logo" />
-      <h1>DECOM - Subir Video</h1>
     </header>
 
     <main>
+      <h2>DECOM - Subir Video</h2>
+
       <input type="file" id="fileInput" accept="video/*" />
       <button onclick="upload()">📤 Subir video</button>
 
@@ -230,4 +229,3 @@
     </script>
   </body>
 </html>
-
