@@ -2,60 +2,75 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>DECOM IPUC BOCHICA SUR</title>
+    <title>Subir video a Archive.org - DECOM</title>
+    <style>
+      body { font-family: sans-serif; padding: 20px; }
+      #copyButton {
+        display: none;
+        margin-top: 10px;
+      }
+    </style>
   </head>
   <body>
-    <h2>DECOM IPUC BOCHICA SUR</h2>
+    <h2>Subir video a DECOM </h2>
     <input type="file" id="fileInput" accept="video/*" />
     <br><br>
-    <button onclick="upload()">Subir video</button>
+    <button onclick="upload()">📤 Subir video</button>
     <div id="status"></div>
+    <button id="copyButton" onclick="copiar()">📋 Copiar link directo</button>
 
     <script>
+      let directLink = "";
+
       async function upload() {
-        const fileInput = document.getElementById('fileInput');
-        const file = fileInput.files[0];
+        const file = document.getElementById("fileInput").files[0];
         if (!file) {
           alert("Selecciona un video primero.");
           return;
         }
 
-        const identifier = 'video_' + Date.now(); // ID único
-        const accessKey = 'eQc2fktg0PEYWqQh'; // <-- reemplaza esto
-        const secretKey = 'x4W4nohzqeIkcrPy'; // <-- reemplaza esto
+        const identifier = "artistica_bochica_" + Date.now();
+        const accessKey = "KPJmAQCm1UyNJWqv";
+        const secretKey = "9JkBrIGexGNOynyf";
 
         const url = `https://s3.us.archive.org/${identifier}/${file.name}`;
 
-        const headers = new Headers();
-        headers.append('authorization', 'LOW ' + accessKey + ':' + secretKey);
-
         const response = await fetch(url, {
-          method: 'PUT',
+          method: "PUT",
           body: file,
           headers: {
             Authorization: `LOW ${accessKey}:${secretKey}`,
-            'x-archive-auto-make-bucket': '1',
-            'x-archive-meta-title': file.name,
-            'x-archive-meta-collection': 'opensource_movies',
-            'x-archive-meta-mediatype': 'movies',
-            'x-archive-meta-description': 'Subido desde App',
-            'Content-Type': file.type
+            "x-archive-auto-make-bucket": "1",
+            "x-archive-meta-title": file.name,
+            "x-archive-meta-mediatype": "movies",
+            "x-archive-meta-description": "Video subido desde la app DECOM",
+            "x-archive-meta-collection": "opensource_movies",
+            "x-archive-meta-creator": "artistica_bochica",
+            "Content-Type": file.type
           }
         });
 
         if (response.ok) {
+          const fileEncoded = encodeURIComponent(file.name);
+          directLink = `https://archive.org/download/${identifier}/${fileEncoded}`;
+
           document.getElementById("status").innerHTML = `
-            <p>✅ Subido correctamente a Archive.org</p>
-            <a href="https://archive.org/details/${identifier}" target="_blank">
-              Ver video en Archive
-            </a>
+            <p>✅ Subido correctamente.</p>
+            <p>🎥 <a href="${directLink}" target="_blank">${directLink}</a></p>
           `;
+          document.getElementById("copyButton").style.display = "inline-block";
         } else {
-          const text = await response.text();
-          document.getElementById("status").innerHTML = `<p>❌ Error: ${text}</p>`;
+          const errorText = await response.text();
+          document.getElementById("status").innerHTML = `<p>❌ Error: ${errorText}</p>`;
         }
+      }
+
+      function copiar() {
+        if (!directLink) return;
+        navigator.clipboard.writeText(directLink)
+          .then(() => alert("✅ Link directo copiado al portapapeles"))
+          .catch(() => alert("❌ No se pudo copiar"));
       }
     </script>
   </body>
 </html>
-
