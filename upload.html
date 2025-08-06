@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Subir video a DECOM</title>
 
-    <!-- Google Font Luckiest Guy -->
+    <!-- Fuente llamativa -->
     <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet" />
 
     <style>
@@ -18,20 +18,29 @@
         font-family: "Segoe UI", sans-serif;
         background-color: #f0f4f8;
         color: #333;
+        position: relative;
+        padding-top: 160px;
       }
 
-      header {
-        height: 200px;
-        background-image: url('logo.png');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        position: relative;
+      .logo-container {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-height: 200px;
+        z-index: 2;
+        text-align: center;
+        background-color: white;
+      }
+
+      .logo-container img {
+        max-width: 100%;
+        height: auto;
+        object-fit: contain;
       }
 
       main {
-        position: relative;
-        top: -80px;
         max-width: 1200px;
         width: 95%;
         margin: 0 auto;
@@ -40,6 +49,8 @@
         padding: 30px 25px;
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
         text-align: center;
+        position: relative;
+        z-index: 1;
       }
 
       h2 {
@@ -47,7 +58,6 @@
         font-size: 36px;
         margin-bottom: 30px;
         color: #2b6cb0;
-        letter-spacing: 1px;
       }
 
       input[type="file"] {
@@ -139,13 +149,8 @@
       }
 
       @media (max-width: 600px) {
-        header {
-          height: 160px;
-        }
-
-        main {
-          top: -60px;
-          padding: 25px 20px;
+        body {
+          padding-top: 140px;
         }
 
         h2 {
@@ -166,7 +171,10 @@
   </head>
 
   <body>
-    <header></header>
+    <!-- Imagen del logo flotando sobre el contenido -->
+    <div class="logo-container">
+      <img src="logo.png" alt="Logo" />
+    </div>
 
     <main>
       <h2>DECOM - Subir Video</h2>
@@ -225,11 +233,9 @@
           if (xhr.status === 200) {
             const fileEncoded = encodeURIComponent(file.name);
             directLink = `https://archive.org/download/${identifier}/${fileEncoded}`;
-
             document.getElementById("status").innerHTML = `
               <p>✅ Subido correctamente.</p>
               <a href="${directLink}" target="_blank">🔗 Ver video</a>`;
-
             document.getElementById("copyButton").style.display = "inline-block";
             document.getElementById("retryButton").style.display = "none";
           } else {
