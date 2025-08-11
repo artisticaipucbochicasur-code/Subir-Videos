@@ -6,6 +6,7 @@
     <title>Subir video a DECOM</title>
     <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet" />
     <style>
+      /* ... mismos estilos ... */
       * { box-sizing: border-box; }
       body { margin: 0; font-family: "Segoe UI", sans-serif; background-color: #f0f4f8; color: #333; position: relative; padding-top: 160px; }
       .logo-container { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-height: 200px; z-index: 2; text-align: center; background-color: transparent; }
@@ -23,16 +24,20 @@
       #copyButton:hover { background-color: #2f855a; }
       #retryButton { background-color: #e53e3e; display: none; }
       #retryButton:hover { background-color: #c53030; }
+      #deleteButton { background-color: #d53f8c; }
+      #deleteButton:hover { background-color: #b83280; }
+      #deleteArea { margin-bottom: 20px; }
       #progressContainer { width: 100%; margin-top: 20px; display: none; }
       #progressBar { width: 100%; height: 20px; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; }
       #progress { height: 100%; width: 0%; background-color: #3182ce; transition: width 0.3s ease; }
       #status { margin-top: 20px; font-size: 16px; color: #444; }
       .note { font-size: 16px; color: #555; margin-top: 30px; background-color: #edf2f7; padding: 20px; border-radius: 10px; line-height: 1.6; }
       a { color: #2b6cb0; word-break: break-word; font-size: 14px; }
+      select { padding: 12px; font-size: 16px; border-radius: 8px; border: 2px solid #90cdf4; margin-bottom: 10px; width: 100%; max-width: 400px; }
       @media (max-width: 600px) {
         body { padding-top: 140px; }
         h2 { font-size: 28px; }
-        input[type="file"], input[type="text"], button { font-size: 16px; padding: 14px; }
+        input[type="file"], input[type="text"], button, select { font-size: 16px; padding: 14px; }
         .note { font-size: 14px; }
         label { font-size: 16px; }
       }
@@ -60,6 +65,12 @@
       <div id="status"></div>
       <button id="copyButton" onclick="copiar()">📋 Copiar link directo</button>
       <button id="retryButton" onclick="upload()">🔁 Reintentar</button>
+      <div id="deleteArea">
+        <select id="deleteSelect">
+          <option value="">Selecciona una publicación para eliminar</option>
+        </select>
+        <button id="deleteButton" onclick="eliminarSeleccionada()">🗑️ Eliminar publicación</button>
+      </div>
       <div class="note">
         🔄 Por favor, espera hasta que el video se suba completamente.<br /><br />
         📋 El link será guardado automáticamente en la hoja de cálculo.<br /><br />
@@ -69,10 +80,31 @@
     </main>
     <script>
       let directLink = "";
+      let identifier = "";
+      let fileName = "";
+      let tituloUsuario = "";
+
+      document.addEventListener("DOMContentLoaded", cargarPublicaciones);
+
+      function cargarPublicaciones() {
+        // Obtiene la lista de publicaciones desde el Apps Script
+        fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=listar')
+          .then(response => response.json())
+          .then(data => {
+            const select = document.getElementById("deleteSelect");
+            select.innerHTML = '<option value="">Selecciona una publicación para eliminar</option>';
+            if (Array.isArray(data.publicaciones)) {
+              data.publicaciones.forEach(pub => {
+                // pub: {titulo, link}
+                select.innerHTML += `<option value="${pub.link}">${pub.titulo}</option>`;
+              });
+            }
+          });
+      }
 
       function upload() {
         const file = document.getElementById("fileInput").files[0];
-        const tituloUsuario = document.getElementById("videoTitle").value.trim();
+        tituloUsuario = document.getElementById("videoTitle").value.trim();
 
         if (!file) {
           alert("Selecciona un video primero.");
@@ -90,11 +122,12 @@
         document.getElementById("copyButton").style.display = "none";
         document.getElementById("status").innerText = "";
 
-        const identifier = "artistica_bochica_" + Date.now();
+        identifier = "artistica_bochica_" + Date.now();
+        fileName = file.name;
         const accessKey = "KPJmAQCm1UyNJWqv";
         const secretKey = "9JkBrIGexGNOynyf";
 
-        const url = `https://s3.us.archive.org/${identifier}/${file.name}`;
+        const url = `https://s3.us.archive.org/${identifier}/${fileName}`;
         const xhr = new XMLHttpRequest();
 
         xhr.upload.onprogress = function (event) {
@@ -107,7 +140,7 @@
 
         xhr.onload = function () {
           if (xhr.status === 200) {
-            const fileEncoded = encodeURIComponent(file.name);
+            const fileEncoded = encodeURIComponent(fileName);
             directLink = `https://archive.org/download/${identifier}/${fileEncoded}`;
             document.getElementById("status").innerHTML = `
               <p>✅ Publicación exitosa.</p>
@@ -115,13 +148,12 @@
             document.getElementById("copyButton").style.display = "inline-block";
             document.getElementById("retryButton").style.display = "none";
 
-            // GUARDAR LINK Y TITULO DEL USUARIO DIRECTAMENTE EN LA HOJA DE CALCULO (sin mostrar mensajes adicionales)
+            // Guardar en hoja de cálculo
             fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=guardar&tipo=video&titulo='
               + encodeURIComponent(tituloUsuario)
               + '&link=' + encodeURIComponent(directLink), {
               method: 'GET'
-            });
-            // No hay .then ni .catch porque no queremos mostrar ningún mensaje adicional
+            }).then(cargarPublicaciones);
 
           } else {
             document.getElementById("status").innerText = "❌ Error al subir: " + xhr.responseText;
@@ -137,7 +169,7 @@
         xhr.open("PUT", url, true);
         xhr.setRequestHeader("Authorization", `LOW ${accessKey}:${secretKey}`);
         xhr.setRequestHeader("x-archive-auto-make-bucket", "1");
-        xhr.setRequestHeader("x-archive-meta-title", file.name);
+        xhr.setRequestHeader("x-archive-meta-title", fileName);
         xhr.setRequestHeader("x-archive-meta-mediatype", "movies");
         xhr.setRequestHeader("x-archive-meta-description", "Video subido desde la app DECOM");
         xhr.setRequestHeader("x-archive-meta-collection", "opensource_movies");
@@ -153,6 +185,54 @@
           .writeText(directLink)
           .then(() => alert("✅ Link copiado al portapapeles"))
           .catch(() => alert("❌ No se pudo copiar"));
+      }
+
+      function eliminarSeleccionada() {
+        const select = document.getElementById("deleteSelect");
+        const link = select.value;
+        const titulo = select.options[select.selectedIndex]?.text;
+
+        if (!link) {
+          alert("Selecciona una publicación para eliminar.");
+          return;
+        }
+
+        // Eliminar de Archive.org
+        let archiveMatch = link.match(/archive\.org\/download\/(artistica_bochica_\d+)\/(.+)$/);
+        if (!archiveMatch) {
+          alert("No se pudo encontrar la ruta del archivo en Archive.org.");
+          return;
+        }
+        let delIdentifier = archiveMatch[1];
+        let delFileName = decodeURIComponent(archiveMatch[2]);
+
+        const url = `https://s3.us.archive.org/${delIdentifier}/${delFileName}`;
+        const accessKey = "KPJmAQCm1UyNJWqv";
+        const secretKey = "9JkBrIGexGNOynyf";
+        const xhr = new XMLHttpRequest();
+
+        xhr.open("DELETE", url, true);
+        xhr.setRequestHeader("Authorization", `LOW ${accessKey}:${secretKey}`);
+
+        xhr.onload = function () {
+          if (xhr.status === 200 || xhr.status === 204) {
+            document.getElementById("status").innerHTML = `<p>🗑️ Publicación eliminada de Archive.org.</p>`;
+            // Eliminar de hoja de cálculo
+            fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=eliminar&link='
+              + encodeURIComponent(link), {
+              method: 'GET'
+            }).then(cargarPublicaciones);
+            select.selectedIndex = 0;
+          } else {
+            document.getElementById("status").innerHTML += "<br>⚠️ Error al eliminar de Archive.org.";
+          }
+        };
+
+        xhr.onerror = function () {
+          document.getElementById("status").innerHTML += "<br>⚠️ Error de red al eliminar de Archive.org.";
+        };
+
+        xhr.send();
       }
     </script>
   </body>
