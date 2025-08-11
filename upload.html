@@ -60,6 +60,19 @@
         color: #2b6cb0;
       }
 
+      .input-group {
+        margin-bottom: 20px;
+        text-align: left;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+        color: #2b6cb0;
+        font-size: 18px;
+      }
+
       input[type="file"] {
         padding: 18px;
         font-size: 18px;
@@ -68,6 +81,21 @@
         margin-bottom: 20px;
         border: 2px dashed #90cdf4;
         background-color: #ebf8ff;
+      }
+
+      input[type="text"] {
+        padding: 16px;
+        font-size: 18px;
+        width: 100%;
+        border-radius: 10px;
+        border: 2px solid #90cdf4;
+        background-color: #ebf8ff;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+      }
+
+      input[type="text"]:required {
+        border-color: #e53e3e;
       }
 
       button {
@@ -158,6 +186,7 @@
         }
 
         input[type="file"],
+        input[type="text"],
         button {
           font-size: 16px;
           padding: 14px;
@@ -165,6 +194,10 @@
 
         .note {
           font-size: 14px;
+        }
+
+        label {
+          font-size: 16px;
         }
       }
     </style>
@@ -179,8 +212,15 @@
     <main>
       <h2>DECOM BOCHICA SUR</h2>
 
-      <input type="file" id="fileInput" accept="video/*" />
-      <button onclick="upload()">📤 Subir video</button>
+      <form id="uploadForm" onsubmit="event.preventDefault(); upload();">
+        <div class="input-group">
+          <label for="videoTitle">Título del video <span style="color: #e53e3e">*</span></label>
+          <input type="text" id="videoTitle" placeholder="Escribe el título del video" maxlength="80" required />
+        </div>
+
+        <input type="file" id="fileInput" accept="video/*" required />
+        <button type="submit">📤 Subir video</button>
+      </form>
 
       <div id="progressContainer">
         <div id="progressBar">
@@ -195,7 +235,7 @@
 
       <div class="note">
         🔄 Por favor, espera hasta que el video se suba completamente.<br /><br />
-        📋 Una vez cargado, el link será guardado automáticamente en la hoja de cálculo.<br /><br />
+        📋 El link será guardado automáticamente en la hoja de cálculo.<br /><br />
         ✅ Luego presiona <strong>“Publivar Video”</strong> en la app para finalizar.<br /><br />
         Desarrollada por: DEIMER HERRERA.
       </div>
@@ -206,8 +246,17 @@
 
       function upload() {
         const file = document.getElementById("fileInput").files[0];
+        const tituloUsuario = document.getElementById("videoTitle").value.trim();
+
         if (!file) {
           alert("Selecciona un video primero.");
+          document.getElementById("fileInput").focus();
+          return;
+        }
+
+        if (!tituloUsuario) {
+          alert("Por favor, escribe el título del video.");
+          document.getElementById("videoTitle").focus();
           return;
         }
 
@@ -240,9 +289,9 @@
             document.getElementById("copyButton").style.display = "inline-block";
             document.getElementById("retryButton").style.display = "none";
 
-            // GUARDAR LINK Y TITULO DIRECTAMENTE EN LA HOJA DE CALCULO
+            // GUARDAR LINK Y TITULO DEL USUARIO DIRECTAMENTE EN LA HOJA DE CALCULO
             fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=guardar&tipo=video&titulo='
-              + encodeURIComponent(file.name)
+              + encodeURIComponent(tituloUsuario)
               + '&link=' + encodeURIComponent(directLink), {
               method: 'GET'
             })
