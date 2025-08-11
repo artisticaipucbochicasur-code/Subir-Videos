@@ -48,7 +48,7 @@
       <img src="logo.png" alt="Logo" />
     </div>
     <main>
-      <h2>DECOM BOCHICA SUR2</h2>
+      <h2>DECOM BOCHICA SUR</h2>
       <form id="uploadForm" onsubmit="event.preventDefault(); upload();">
         <div class="input-group">
           <label for="videoTitle">Título del video <span style="color: #e53e3e">*</span></label>
@@ -187,7 +187,7 @@
           .catch(() => alert("❌ No se pudo copiar"));
       }
 
-     function eliminarSeleccionada() {
+      function eliminarSeleccionada() {
         const select = document.getElementById("deleteSelect");
         const link = select.value;
         const titulo = select.options[select.selectedIndex]?.text;
@@ -206,17 +206,17 @@
         let delIdentifier = archiveMatch[1];
         let delFileName = decodeURIComponent(archiveMatch[2]);
 
-        const url = https://s3.us.archive.org/${delIdentifier}/${delFileName};
+        const url = `https://s3.us.archive.org/${delIdentifier}/${delFileName}`;
         const accessKey = "KPJmAQCm1UyNJWqv";
         const secretKey = "9JkBrIGexGNOynyf";
         const xhr = new XMLHttpRequest();
 
         xhr.open("DELETE", url, true);
-        xhr.setRequestHeader("Authorization", LOW ${accessKey}:${secretKey});
+        xhr.setRequestHeader("Authorization", `LOW ${accessKey}:${secretKey}`);
 
         xhr.onload = function () {
           if (xhr.status === 200 || xhr.status === 204) {
-            document.getElementById("status").innerHTML = <p>🗑️ Publicación eliminada de Archive.org.</p>;
+            document.getElementById("status").innerHTML = `<p>🗑️ Publicación eliminada de Archive.org.</p>`;
             // Eliminar de hoja de cálculo
             fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=eliminar&link='
               + encodeURIComponent(link), {
@@ -233,11 +233,7 @@
         };
 
         xhr.send();
-
       }
     </script>
   </body>
 </html>
-
-
-
