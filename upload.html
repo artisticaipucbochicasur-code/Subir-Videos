@@ -44,7 +44,6 @@
 
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("titulo", titulo);
 
         const xhr = new XMLHttpRequest();
         xhr.upload.onprogress = function (event) {
@@ -66,6 +65,8 @@
                 <a href="${directLink}" target="_blank">🔗 Ver video</a>`;
               document.getElementById("copyButton").style.display = "inline-block";
               document.getElementById("retryButton").style.display = "none";
+              // ⏩ Enviar el link y el título a la hoja automáticamente
+              enviarLinkAScript(directLink, titulo);
             } else {
               document.getElementById("status").innerText = "❌ Error: " + (resp.message || xhr.responseText);
               document.getElementById("retryButton").style.display = "inline-block";
@@ -81,9 +82,31 @@
           document.getElementById("retryButton").style.display = "inline-block";
         };
 
-        // Reemplaza con la URL de tu Google Apps Script desplegado
+        // La URL de tu Apps Script que recibe el archivo y retorna el link
         xhr.open("POST", "https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec", true);
         xhr.send(formData);
+      }
+
+      // Esta función guarda el link y el título en tu hoja automáticamente
+      function enviarLinkAScript(linkDrive, titulo) {
+        // La misma URL de tu Apps Script pero con parámetros tipo video
+        const url = "https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec";
+        // Usamos fetch para enviar los datos tipo "guardar video"
+        const params = new URLSearchParams({
+          accion: "guardar",
+          tipo: "video",
+          titulo: titulo,
+          link: linkDrive
+        });
+        fetch(url + "?" + params.toString(), { method: "GET" })
+          .then(res => res.text())
+          .then(data => {
+            // Opcional: mostrar confirmación
+            document.getElementById("status").innerHTML += "<br>📋 Guardado en hoja de cálculo.";
+          })
+          .catch(() => {
+            document.getElementById("status").innerHTML += "<br>❌ Error al guardar en hoja.";
+          });
       }
 
       function copiar() {
