@@ -10,8 +10,7 @@
 <body>
   <h2>Subir video a Drive y guardar en hoja</h2>
   
-  <form id="uploadForm" method="POST" enctype="multipart/form-data" action="https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec">
-
+  <form id="uploadForm">
     <label>Título del video:</label><br>
     <input type="text" name="titulo" placeholder="Escribe un título" required>
     <br><br>
@@ -28,10 +27,10 @@
 
     document.getElementById("uploadForm").onsubmit = function(event) {
       event.preventDefault();
-      var form = document.getElementById("uploadForm");
-      var formData = new FormData(form);
+      const form = document.getElementById("uploadForm");
+      const formData = new FormData(form);
 
-      fetch(form.action, {
+      fetch("https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec", {
         method: "POST",
         body: formData
       })
@@ -39,14 +38,14 @@
       .then(data => {
         if (data.status === "success") {
           lastLink = data.link;
-          document.getElementById("response").innerHTML = "<p>Subido correctamente:</p><a href='" + lastLink + "' target='_blank'>" + lastLink + "</a>";
+          document.getElementById("response").innerHTML = "<p>✅ Subido correctamente:</p><a href='" + lastLink + "' target='_blank'>" + lastLink + "</a>";
           document.getElementById("copyButton").style.display = "inline-block";
         } else {
-          document.getElementById("response").innerText = "Error: " + data.message;
+          document.getElementById("response").innerText = "❌ Error: " + data.message;
         }
       })
       .catch(error => {
-        document.getElementById("response").innerText = "Error: " + error;
+        document.getElementById("response").innerText = "❌ Error: " + error;
       });
     };
 
