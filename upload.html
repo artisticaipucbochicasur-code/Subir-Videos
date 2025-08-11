@@ -1,61 +1,74 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="UTF-8">
-  <title>Subir video a Drive</title>
-  <style>
-    #copyButton { display: none; margin-top: 10px; }
-  </style>
-</head>
-<body>
-  <h2>Subir video a Drive</h2>
-  
-  <form id="uploadForm">
-    <label>Título del video:</label><br>
-    <input type="text" name="titulo" placeholder="Escribe un título" required>
-    <br><br>
-    <input type="file" name="file" accept="video/*" required>
-    <br><br>
-    <input type="submit" value="Subir video">
-  </form>
+  <head>
+    <meta charset="UTF-8">
+    <title>Subir video a GoFile</title>
+    <style>
+      #copyButton {
+        display: none;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Subir video a DECOM</h2>
+    <form id="uploadForm" method="POST" enctype="multipart/form-data" action="https://store10.gofile.io/uploadFile">
+      <input type="file" name="file" accept="video/*" required />
+      <input type="hidden" name="token" value="icoEBPihfwCSpUwviOv77DUO6GDxAJJa">
+      <br><br>
+      <input type="submit" value="Subir video" />
+    </form>
+    <div id="response"></div>
+    <button id="copyButton">📋 Copiar link</button>
 
-  <div id="response"></div>
-  <button id="copyButton">📋 Copiar link</button>
+    <script>
+      let lastLink = "";
 
-  <script>
-    let lastLink = "";
+      document.getElementById("uploadForm").onsubmit = function(event) {
+        event.preventDefault();
+        var form = document.getElementById("uploadForm");
+        var formData = new FormData(form);
 
-    document.getElementById("uploadForm").onsubmit = function(event) {
-      event.preventDefault();
-      const form = document.getElementById("uploadForm");
-      const formData = new FormData(form);
+        fetch(form.action, {
+          method: "POST",
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === "ok") {
+            const code = data.data.code;
 
-      fetch("https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec", {
-        method: "POST",
-        body: formData
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === "success") {
-          lastLink = data.link;
-          document.getElementById("response").innerHTML = "<p>✅ Subido correctamente:</p><a href='" + lastLink + "' target='_blank'>" + lastLink + "</a>";
-          document.getElementById("copyButton").style.display = "inline-block";
-        } else {
-          document.getElementById("response").innerText = "❌ Error: " + data.message;
-        }
-      })
-      .catch(error => {
-        document.getElementById("response").innerText = "❌ Error: " + error;
-      });
-    };
+            // SEGUNDA PETICIÓN para obtener el link directo
+            fetch(`https://api.gofile.io/getContent?contentId=${code}`)
+              .then(res => res.json())
+              .then(contentData => {
+                const contents = contentData.data.contents;
+                const firstFile = Object.values(contents)[0];
+                const link = firstFile.directLink;
 
-    document.getElementById("copyButton").onclick = function() {
-      if (!lastLink) return;
-      navigator.clipboard.writeText(lastLink)
-        .then(() => alert("✅ Link copiado al portapapeles"))
-        .catch(() => alert("❌ Error al copiar el link"));
-    };
-  </script>
-</body>
+                lastLink = link;
+                document.getElementById("response").innerHTML = "<p>Subido correctamente:</p><a href='" + link + "' target='_blank'>" + link + "</a>";
+                document.getElementById("copyButton").style.display = "inline-block";
+              })
+              .catch(() => {
+                document.getElementById("response").innerText = "No se pudo obtener el link directo del archivo.";
+              });
+
+          } else {
+            document.getElementById("response").innerText = "Error al subir: " + data.status;
+          }
+        })
+        .catch(error => {
+          document.getElementById("response").innerText = "Error: " + error;
+        });
+      };
+
+      document.getElementById("copyButton").onclick = function() {
+        if (!lastLink) return;
+        navigator.clipboard.writeText(lastLink)
+          .then(() => alert("✅ Link copiado al portapapeles"))
+          .catch(() => alert("❌ Error al copiar el link"));
+      };
+    </script>
+  </body>
 </html>
-
