@@ -187,53 +187,56 @@
           .catch(() => alert("❌ No se pudo copiar"));
       }
 
-      function eliminarSeleccionada() {
-        const select = document.getElementById("deleteSelect");
-        const link = select.value;
-        const titulo = select.options[select.selectedIndex]?.text;
+     function eliminarSeleccionada() {
+  const select = document.getElementById("deleteSelect");
+  const link = select.value;
+  const titulo = select.options[select.selectedIndex]?.text;
 
-        if (!link) {
-          alert("Selecciona una publicación para eliminar.");
-          return;
-        }
+  if (!link) {
+    alert("Selecciona una publicación para eliminar.");
+    return;
+  }
 
-        // Eliminar de Archive.org
-        let archiveMatch = link.match(/archive\.org\/download\/(artistica_bochica_\d+)\/(.+)$/);
-        if (!archiveMatch) {
-          alert("No se pudo encontrar la ruta del archivo en Archive.org.");
-          return;
-        }
-        let delIdentifier = archiveMatch[1];
-        let delFileName = decodeURIComponent(archiveMatch[2]);
+  // Extraer identifier completo del link
+  let archiveMatch = link.match(/archive\.org\/download\/(artistica_bochica_\d+)\/(.+)$/);
+  if (!archiveMatch) {
+    alert("No se pudo encontrar la ruta del archivo en Archive.org.");
+    return;
+  }
+  let delIdentifier = archiveMatch[1];
 
-        const url = `https://s3.us.archive.org/${delIdentifier}/${delFileName}`;
-        const accessKey = "KPJmAQCm1UyNJWqv";
-        const secretKey = "9JkBrIGexGNOynyf";
-        const xhr = new XMLHttpRequest();
+  // URL para borrar TODO el ítem
+  const url = `https://s3.us.archive.org/${delIdentifier}`;
+  const accessKey = "KPJmAQCm1UyNJWqv";
+  const secretKey = "9JkBrIGexGNOynyf";
+  const xhr = new XMLHttpRequest();
 
-        xhr.open("DELETE", url, true);
-        xhr.setRequestHeader("Authorization", `LOW ${accessKey}:${secretKey}`);
+  xhr.open("DELETE", url, true);
+  xhr.setRequestHeader("Authorization", `LOW ${accessKey}:${secretKey}`);
 
-        xhr.onload = function () {
-          if (xhr.status === 200 || xhr.status === 204) {
-            document.getElementById("status").innerHTML = `<p>🗑️ Publicación eliminada de Archive.org.</p>`;
-            // Eliminar de hoja de cálculo
-            fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=eliminar&link='
-              + encodeURIComponent(link), {
-              method: 'GET'
-            }).then(cargarPublicaciones);
-            select.selectedIndex = 0;
-          } else {
-            document.getElementById("status").innerHTML += "<br>⚠️ Error al eliminar de Archive.org.";
-          }
-        };
+  xhr.onload = function () {
+    if (xhr.status === 200 || xhr.status === 204) {
+      document.getElementById("status").innerHTML = `<p>🗑️ Publicación eliminada completamente de Archive.org.</p>`;
+      // Eliminar también de la hoja de cálculo
+      fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=eliminar&link='
+        + encodeURIComponent(link), {
+        method: 'GET'
+      }).then(cargarPublicaciones);
+      select.selectedIndex = 0;
+    } else {
+      document.getElementById("status").innerHTML += "<br>⚠️ Error al eliminar de Archive.org.";
+    }
+  };
 
-        xhr.onerror = function () {
-          document.getElementById("status").innerHTML += "<br>⚠️ Error de red al eliminar de Archive.org.";
-        };
+  xhr.onerror = function () {
+    document.getElementById("status").innerHTML += "<br>⚠️ Error de red al eliminar de Archive.org.";
+  };
 
-        xhr.send();
+  xhr.send();
+}
+
       }
     </script>
   </body>
 </html>
+
