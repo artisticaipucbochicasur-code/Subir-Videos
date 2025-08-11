@@ -7,16 +7,33 @@
     <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet" />
     <style>
       /* ... todos tus estilos originales ... */
+      body { margin: 0; font-family: "Segoe UI", sans-serif; background: #f0f4f8; padding-top: 160px; }
+      .logo-container { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-height: 200px; z-index: 2; text-align: center; }
+      .logo-container img { max-width: 100%; height: auto; object-fit: contain; }
+      main { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 14px; padding: 30px 25px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); text-align: center; position: relative; z-index: 1; }
+      h2 { font-family: 'Luckiest Guy', cursive; font-size: 36px; margin-bottom: 30px; color: #2b6cb0; }
+      input[type="file"], input[type="text"] { padding: 18px; font-size: 18px; width: 100%; border-radius: 10px; margin-bottom: 20px; border: 2px dashed #90cdf4; background: #ebf8ff; }
+      button { padding: 16px 24px; font-size: 20px; background: #2b6cb0; color: white; border: none; border-radius: 10px; cursor: pointer; width: 100%; margin-bottom: 15px; }
+      button:hover { background: #2c5282; }
+      #copyButton { background: #38a169; }
+      #copyButton:hover { background: #2f855a; }
+      #retryButton { background: #e53e3e; display: none; }
+      #retryButton:hover { background: #c53030; }
+      #progressContainer { width: 100%; margin-top: 20px; display: none; }
+      #progressBar { width: 100%; height: 20px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
+      #progress { height: 100%; width: 0%; background: #3182ce; transition: width 0.3s ease; }
+      #status { margin-top: 20px; font-size: 16px; color: #444; }
+      .note { font-size: 16px; color: #555; margin-top: 30px; background: #edf2f7; padding: 20px; border-radius: 10px; line-height: 1.6; }
+      a { color: #2b6cb0; word-break: break-word; font-size: 14px; }
+      @media (max-width: 600px) { main { padding: 10px; } h2 { font-size: 28px; } input, button { font-size: 16px; padding: 14px; } .note { font-size: 14px; } }
     </style>
   </head>
   <body>
-    <div class="logo-container">
-      <img src="logo.png" alt="Logo" />
-    </div>
+    <div class="logo-container"><img src="logo.png" alt="Logo" /></div>
     <main>
-      <h2>DECOM BOCHICA SUR</h2>
+      <h2>DECOM BOCHICA SUR2</h2>
       <input type="file" id="fileInput" accept="video/*" />
-      <input type="text" id="tituloInput" placeholder="Título del video" style="margin-bottom:15px;width:100%;padding:14px;font-size:16px;" />
+      <input type="text" id="tituloInput" placeholder="Título del video" />
       <button onclick="upload()">📤 Subir video</button>
       <div id="progressContainer">
         <div id="progressBar"><div id="progress"></div></div>
@@ -65,7 +82,7 @@
                 <a href="${directLink}" target="_blank">🔗 Ver video</a>`;
               document.getElementById("copyButton").style.display = "inline-block";
               document.getElementById("retryButton").style.display = "none";
-              // ⏩ Enviar el link y el título a la hoja automáticamente
+              // ⏩ Guardar el link y el título en la hoja automáticamente
               enviarLinkAScript(directLink, titulo);
             } else {
               document.getElementById("status").innerText = "❌ Error: " + (resp.message || xhr.responseText);
@@ -82,16 +99,14 @@
           document.getElementById("retryButton").style.display = "inline-block";
         };
 
-        // La URL de tu Apps Script que recibe el archivo y retorna el link
+        // Tu URL de Apps Script para subir el archivo
         xhr.open("POST", "https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec", true);
         xhr.send(formData);
       }
 
-      // Esta función guarda el link y el título en tu hoja automáticamente
+      // Guarda el link y título en tu hoja automáticamente
       function enviarLinkAScript(linkDrive, titulo) {
-        // La misma URL de tu Apps Script pero con parámetros tipo video
         const url = "https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec";
-        // Usamos fetch para enviar los datos tipo "guardar video"
         const params = new URLSearchParams({
           accion: "guardar",
           tipo: "video",
@@ -101,7 +116,6 @@
         fetch(url + "?" + params.toString(), { method: "GET" })
           .then(res => res.text())
           .then(data => {
-            // Opcional: mostrar confirmación
             document.getElementById("status").innerHTML += "<br>📋 Guardado en hoja de cálculo.";
           })
           .catch(() => {
