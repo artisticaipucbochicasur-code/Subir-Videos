@@ -295,9 +295,17 @@
               + '&link=' + encodeURIComponent(directLink), {
               method: 'GET'
             })
-            .then(response => response.json())
+            .then(response => {
+              // Manejo robusto de la respuesta JSON o texto
+              if (response.headers.get("content-type")?.includes("application/json")) {
+                return response.json();
+              } else {
+                return response.text();
+              }
+            })
             .then(data => {
-              if (data.status === 'success') {
+              if ((typeof data === 'object' && data.status === 'success') ||
+                  (typeof data === 'string' && data.includes('success'))) {
                 document.getElementById("status").innerHTML += "<br>✅ Link guardado automáticamente en la hoja.";
               } else {
                 document.getElementById("status").innerHTML += "<br>⚠️ No se pudo guardar en la hoja.";
