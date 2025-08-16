@@ -216,7 +216,7 @@
 
         xhr.onload = function () {
           if (xhr.status === 200 || xhr.status === 204) {
-            document.getElementById("status").innerHTML = `<p>🗑️ Publicación eliminada de Archive.org.</p>`;
+            document.getElementById("status").innerHTML = `<p>🗑️ Publicación eliminada de DECOM.</p>`;
             fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=eliminar&link='
               + encodeURIComponent(link), {
               method: 'GET'
@@ -236,4 +236,5 @@
     </script>
   </body>
 </html>
+
 
