@@ -88,7 +88,7 @@
 
       function cargarPublicaciones() {
         // Obtiene la lista de publicaciones desde el Apps Script
-        fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=listar')
+        fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=listarWeb')
           .then(response => response.json())
           .then(data => {
             const select = document.getElementById("deleteSelect");
@@ -187,7 +187,7 @@
           .catch(() => alert("❌ No se pudo copiar"));
       }
 
-       function eliminarSeleccionada() {
+        function eliminarSeleccionada() {
         const select = document.getElementById("deleteSelect");
         const link = select.value;
         const titulo = select.options[select.selectedIndex]?.text;
@@ -238,5 +238,3 @@
     </script>
   </body>
 </html>
-
-
