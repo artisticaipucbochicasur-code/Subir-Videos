@@ -86,24 +86,23 @@
 
       document.addEventListener("DOMContentLoaded", cargarPublicaciones);
 
-     function cargarPublicaciones() {
-  fetch("https://script.google.com/macros/s/TU_DEPLOY_ID/exec?accion=listarWeb")
-    .then(r => r.json())
-    .then(data => {
-      const select = document.getElementById("deleteSelect");
-      select.innerHTML = '<option value="">Selecciona una publicación para eliminar</option>';
+      function cargarPublicaciones() {
+        fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=listar&tipo=videos')
+          .then(response => response.json())
+          .then(data => {
+            const select = document.getElementById("deleteSelect");
+            select.innerHTML = '<option value="">Selecciona una publicación para eliminar</option>';
 
-      if (data.status === "success" && Array.isArray(data.publicaciones)) {
-        data.publicaciones.forEach(pub => {
-          if (pub.titulo && pub.link) {
-            select.innerHTML += `<option value="${pub.link}">${pub.titulo}</option>`;
-          }
-        });
+            if (Array.isArray(data.data)) {
+              data.data.forEach(row => {
+                const titulo = row[0];
+                const link = row[1];
+                // Mostrar título + link en la opción
+                select.innerHTML += `<option value="${link}">${titulo} — ${link}</option>`;
+              });
+            }
+          });
       }
-    })
-    .catch(err => console.error("Error:", err));
-}
-
 
       function upload() {
         const file = document.getElementById("fileInput").files[0];
@@ -151,7 +150,6 @@
             document.getElementById("copyButton").style.display = "inline-block";
             document.getElementById("retryButton").style.display = "none";
 
-            // Guardar en hoja de cálculo
             fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=guardar&tipo=video&titulo='
               + encodeURIComponent(tituloUsuario)
               + '&link=' + encodeURIComponent(directLink), {
@@ -200,7 +198,6 @@
           return;
         }
 
-        // Eliminar de Archive.org
         let archiveMatch = link.match(/archive\.org\/download\/(artistica_bochica_\d+)\/(.+)$/);
         if (!archiveMatch) {
           alert("No se pudo encontrar la ruta del archivo en Archive.org.");
@@ -220,7 +217,6 @@
         xhr.onload = function () {
           if (xhr.status === 200 || xhr.status === 204) {
             document.getElementById("status").innerHTML = `<p>🗑️ Publicación eliminada de Archive.org.</p>`;
-            // Eliminar de hoja de cálculo
             fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=eliminar&link='
               + encodeURIComponent(link), {
               method: 'GET'
@@ -240,4 +236,3 @@
     </script>
   </body>
 </html>
-
