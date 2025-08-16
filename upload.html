@@ -73,8 +73,8 @@
       </div>
       <div class="note">
         🔄 Por favor, espera hasta que el video se suba completamente.<br /><br />
-        📋 El link será guardado automáticamente en la hoja de cálculo.<br /><br />
-        ✅ Luego presiona <strong>“Publivar Video”</strong> en la app para finalizar.<br /><br />
+        📋 La publicación será guardado automáticamente en DECOM.<br /><br />
+        ✅ Luego ve<strong>“Videos”</strong> en la app para visualizar.<br /><br />
         Desarrollada por: DEIMER HERRERA.
       </div>
     </main>
@@ -97,8 +97,8 @@
               data.data.forEach(row => {
                 const titulo = row[0];
                 const link = row[1];
-                // Mostrar título + link en la opción
-                select.innerHTML += `<option value="${link}">${titulo} — ${link}</option>`;
+                // Solo mostrar el título, guardar el link como value
+                select.innerHTML += `<option value="${link}">${titulo}</option>`;
               });
             }
           });
