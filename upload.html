@@ -86,26 +86,24 @@
 
       document.addEventListener("DOMContentLoaded", cargarPublicaciones);
 
-      function cargarPublicaciones() {
-        // ✅ Ahora usa listarWeb y valida la respuesta
-        fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=listarWeb')
-          .then(response => response.json())
-          .then(data => {
-            const select = document.getElementById("deleteSelect");
-            select.innerHTML = '<option value="">Selecciona una publicación para eliminar</option>';
+     function cargarPublicaciones() {
+  fetch("https://script.google.com/macros/s/TU_DEPLOY_ID/exec?accion=listarWeb")
+    .then(r => r.json())
+    .then(data => {
+      const select = document.getElementById("deleteSelect");
+      select.innerHTML = '<option value="">Selecciona una publicación para eliminar</option>';
 
-            if (data.status === "success" && Array.isArray(data.publicaciones)) {
-              data.publicaciones.forEach(pub => {
-                if (pub.titulo && pub.link) {
-                  select.innerHTML += `<option value="${pub.link}">${pub.titulo}</option>`;
-                }
-              });
-            }
-          })
-          .catch(err => {
-            console.error("Error al cargar publicaciones:", err);
-          });
+      if (data.status === "success" && Array.isArray(data.publicaciones)) {
+        data.publicaciones.forEach(pub => {
+          if (pub.titulo && pub.link) {
+            select.innerHTML += `<option value="${pub.link}">${pub.titulo}</option>`;
+          }
+        });
       }
+    })
+    .catch(err => console.error("Error:", err));
+}
+
 
       function upload() {
         const file = document.getElementById("fileInput").files[0];
@@ -242,3 +240,4 @@
     </script>
   </body>
 </html>
+
