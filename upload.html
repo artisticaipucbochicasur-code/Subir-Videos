@@ -52,23 +52,14 @@
   </div>
 
   <div class="input-group">
-    <label for="videoAuthor">Autor de la publicación <span style="color: #e53e3e">*</span></label>
-    <input type="text" id="videoAuthor" placeholder="Tu nombre completo" maxlength="60" required />
-  </div>
-
-  <div class="input-group">
-    <label for="videoEmail">Correo del autor <span style="color: #e53e3e">*</span></label>
-    <input type="text" id="videoEmail" placeholder="Tu correo electrónico" maxlength="80" required />
-  </div>
-
-  <div class="input-group">
-    <label for="videoDesc">Descripción del video</label>
-    <input type="text" id="videoDesc" placeholder="Escribe una breve descripción" maxlength="200" />
+    <label for="videoDescripcion">Descripción del video</label>
+    <input type="text" id="videoDescripcion" placeholder="Escribe una breve descripción (opcional)" maxlength="200" />
   </div>
 
   <input type="file" id="fileInput" accept="video/*" required />
   <button type="submit">📤 Subir video</button>
 </form>
+
 
     
     <div class="logo-container">
@@ -134,9 +125,11 @@
    function upload() {
   const file = document.getElementById("fileInput").files[0];
   tituloUsuario = document.getElementById("videoTitle").value.trim();
-  const autorUsuario = document.getElementById("videoAuthor").value.trim();
-  const correoUsuario = document.getElementById("videoEmail").value.trim();
-  const descUsuario = document.getElementById("videoDesc").value.trim();
+  const descripcionUsuario = document.getElementById("videoDescripcion").value.trim();
+
+  // 🔹 Autor y correo predeterminados
+  const autorPredeterminado = "Autor Demo";
+  const correoPredeterminado = "correo@demo.com";
 
   if (!file) {
     alert("Selecciona un video primero.");
@@ -144,8 +137,9 @@
     return;
   }
 
-  if (!tituloUsuario || !autorUsuario || !correoUsuario) {
-    alert("Por favor, completa todos los campos obligatorios.");
+  if (!tituloUsuario) {
+    alert("Por favor, escribe el título del video.");
+    document.getElementById("videoTitle").focus();
     return;
   }
 
@@ -179,13 +173,13 @@
       document.getElementById("copyButton").style.display = "inline-block";
       document.getElementById("retryButton").style.display = "none";
 
-      fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=guardar'
-        + '&tipo=video'
+      // 🔹 Ahora enviamos titulo, link, descripcion, autor y correo
+      fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=guardar&tipo=video'
         + '&titulo=' + encodeURIComponent(tituloUsuario)
         + '&link=' + encodeURIComponent(directLink)
-        + '&autor=' + encodeURIComponent(autorUsuario)
-        + '&correo=' + encodeURIComponent(correoUsuario)
-        + '&descripcion=' + encodeURIComponent(descUsuario), {
+        + '&autor=' + encodeURIComponent(autorPredeterminado)
+        + '&correo=' + encodeURIComponent(correoPredeterminado)
+        + '&descripcion=' + encodeURIComponent(descripcionUsuario), {
         method: 'GET'
       }).then(cargarPublicaciones);
 
@@ -212,6 +206,7 @@
 
   xhr.send(file);
 }
+
 
 
       function copiar() {
@@ -270,6 +265,7 @@
     </script>
   </body>
 </html>
+
 
 
 
