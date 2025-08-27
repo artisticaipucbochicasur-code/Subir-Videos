@@ -44,6 +44,33 @@
     </style>
   </head>
   <body>
+
+<form id="uploadForm" onsubmit="event.preventDefault(); upload();">
+  <div class="input-group">
+    <label for="videoTitle">Título del video <span style="color: #e53e3e">*</span></label>
+    <input type="text" id="videoTitle" placeholder="Escribe el título del video" maxlength="80" required />
+  </div>
+
+  <div class="input-group">
+    <label for="videoAuthor">Autor de la publicación <span style="color: #e53e3e">*</span></label>
+    <input type="text" id="videoAuthor" placeholder="Tu nombre completo" maxlength="60" required />
+  </div>
+
+  <div class="input-group">
+    <label for="videoEmail">Correo del autor <span style="color: #e53e3e">*</span></label>
+    <input type="text" id="videoEmail" placeholder="Tu correo electrónico" maxlength="80" required />
+  </div>
+
+  <div class="input-group">
+    <label for="videoDesc">Descripción del video</label>
+    <input type="text" id="videoDesc" placeholder="Escribe una breve descripción" maxlength="200" />
+  </div>
+
+  <input type="file" id="fileInput" accept="video/*" required />
+  <button type="submit">📤 Subir video</button>
+</form>
+
+    
     <div class="logo-container">
       <img src="logo.png" alt="Logo" />
     </div>
@@ -104,81 +131,88 @@
           });
       }
 
-      function upload() {
-        const file = document.getElementById("fileInput").files[0];
-        tituloUsuario = document.getElementById("videoTitle").value.trim();
+   function upload() {
+  const file = document.getElementById("fileInput").files[0];
+  tituloUsuario = document.getElementById("videoTitle").value.trim();
+  const autorUsuario = document.getElementById("videoAuthor").value.trim();
+  const correoUsuario = document.getElementById("videoEmail").value.trim();
+  const descUsuario = document.getElementById("videoDesc").value.trim();
 
-        if (!file) {
-          alert("Selecciona un video primero.");
-          document.getElementById("fileInput").focus();
-          return;
-        }
+  if (!file) {
+    alert("Selecciona un video primero.");
+    document.getElementById("fileInput").focus();
+    return;
+  }
 
-        if (!tituloUsuario) {
-          alert("Por favor, escribe el título del video.");
-          document.getElementById("videoTitle").focus();
-          return;
-        }
+  if (!tituloUsuario || !autorUsuario || !correoUsuario) {
+    alert("Por favor, completa todos los campos obligatorios.");
+    return;
+  }
 
-        document.getElementById("retryButton").style.display = "none";
-        document.getElementById("copyButton").style.display = "none";
-        document.getElementById("status").innerText = "";
+  document.getElementById("retryButton").style.display = "none";
+  document.getElementById("copyButton").style.display = "none";
+  document.getElementById("status").innerText = "";
 
-        identifier = "artistica_bochica_" + Date.now();
-        fileName = file.name;
-        const accessKey = "KPJmAQCm1UyNJWqv";
-        const secretKey = "9JkBrIGexGNOynyf";
+  identifier = "artistica_bochica_" + Date.now();
+  fileName = file.name;
+  const accessKey = "KPJmAQCm1UyNJWqv";
+  const secretKey = "9JkBrIGexGNOynyf";
 
-        const url = `https://s3.us.archive.org/${identifier}/${fileName}`;
-        const xhr = new XMLHttpRequest();
+  const url = `https://s3.us.archive.org/${identifier}/${fileName}`;
+  const xhr = new XMLHttpRequest();
 
-        xhr.upload.onprogress = function (event) {
-          if (event.lengthComputable) {
-            const percent = (event.loaded / event.total) * 100;
-            document.getElementById("progressContainer").style.display = "block";
-            document.getElementById("progress").style.width = percent + "%";
-          }
-        };
+  xhr.upload.onprogress = function (event) {
+    if (event.lengthComputable) {
+      const percent = (event.loaded / event.total) * 100;
+      document.getElementById("progressContainer").style.display = "block";
+      document.getElementById("progress").style.width = percent + "%";
+    }
+  };
 
-        xhr.onload = function () {
-          if (xhr.status === 200) {
-            const fileEncoded = encodeURIComponent(fileName);
-            directLink = `https://archive.org/download/${identifier}/${fileEncoded}`;
-            document.getElementById("status").innerHTML = `
-              <p>✅ Publicación exitosa.</p>
-              <a href="${directLink}" target="_blank">🔗 Ver video</a>`;
-            document.getElementById("copyButton").style.display = "inline-block";
-            document.getElementById("retryButton").style.display = "none";
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      const fileEncoded = encodeURIComponent(fileName);
+      directLink = `https://archive.org/download/${identifier}/${fileEncoded}`;
+      document.getElementById("status").innerHTML = `
+        <p>✅ Publicación exitosa.</p>
+        <a href="${directLink}" target="_blank">🔗 Ver video</a>`;
+      document.getElementById("copyButton").style.display = "inline-block";
+      document.getElementById("retryButton").style.display = "none";
 
-            fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=guardar&tipo=video&titulo='
-              + encodeURIComponent(tituloUsuario)
-              + '&link=' + encodeURIComponent(directLink), {
-              method: 'GET'
-            }).then(cargarPublicaciones);
+      fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=guardar'
+        + '&tipo=video'
+        + '&titulo=' + encodeURIComponent(tituloUsuario)
+        + '&link=' + encodeURIComponent(directLink)
+        + '&autor=' + encodeURIComponent(autorUsuario)
+        + '&correo=' + encodeURIComponent(correoUsuario)
+        + '&descripcion=' + encodeURIComponent(descUsuario), {
+        method: 'GET'
+      }).then(cargarPublicaciones);
 
-          } else {
-            document.getElementById("status").innerText = "❌ Error al subir: " + xhr.responseText;
-            document.getElementById("retryButton").style.display = "inline-block";
-          }
-        };
+    } else {
+      document.getElementById("status").innerText = "❌ Error al subir: " + xhr.responseText;
+      document.getElementById("retryButton").style.display = "inline-block";
+    }
+  };
 
-        xhr.onerror = function () {
-          document.getElementById("status").innerText = "❌ Error de red al subir el archivo.";
-          document.getElementById("retryButton").style.display = "inline-block";
-        };
+  xhr.onerror = function () {
+    document.getElementById("status").innerText = "❌ Error de red al subir el archivo.";
+    document.getElementById("retryButton").style.display = "inline-block";
+  };
 
-        xhr.open("PUT", url, true);
-        xhr.setRequestHeader("Authorization", `LOW ${accessKey}:${secretKey}`);
-        xhr.setRequestHeader("x-archive-auto-make-bucket", "1");
-        xhr.setRequestHeader("x-archive-meta-title", fileName);
-        xhr.setRequestHeader("x-archive-meta-mediatype", "movies");
-        xhr.setRequestHeader("x-archive-meta-description", "Video subido desde la app DECOM");
-        xhr.setRequestHeader("x-archive-meta-collection", "opensource_movies");
-        xhr.setRequestHeader("x-archive-meta-creator", "artistica_bochica");
-        xhr.setRequestHeader("Content-Type", file.type);
+  xhr.open("PUT", url, true);
+  xhr.setRequestHeader("Authorization", `LOW ${accessKey}:${secretKey}`);
+  xhr.setRequestHeader("x-archive-auto-make-bucket", "1");
+  xhr.setRequestHeader("x-archive-meta-title", fileName);
+  xhr.setRequestHeader("x-archive-meta-mediatype", "movies");
+  xhr.setRequestHeader("x-archive-meta-description", "Video subido desde la app DECOM");
+  xhr.setRequestHeader("x-archive-meta-collection", "opensource_movies");
+  xhr.setRequestHeader("x-archive-meta-creator", "artistica_bochica");
+  xhr.setRequestHeader("Content-Type", file.type);
 
-        xhr.send(file);
-      }
+  xhr.send(file);
+}
+
 
       function copiar() {
         if (!directLink) return;
@@ -236,5 +270,6 @@
     </script>
   </body>
 </html>
+
 
 
