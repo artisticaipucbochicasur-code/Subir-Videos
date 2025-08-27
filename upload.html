@@ -116,9 +116,11 @@
   tituloUsuario = document.getElementById("videoTitle").value.trim();
   const descripcionUsuario = document.getElementById("videoDescripcion").value.trim();
 
-  // Autor y correo predeterminados
-  const autorPredeterminado = "DECOM Bochica";
-  const correoPredeterminado = "decom@colegio.edu";
+  // Obtener autor y correo desde localStorage (si no existen, usar los predeterminados)
+  const autorPredeterminado = "AnónimoDH";
+  const correoPredeterminado = "decom@bochicasur.edu";
+  const autor = localStorage.getItem("autor") || autorPredeterminado;
+  const correo = localStorage.getItem("correo") || correoPredeterminado;
 
   if (!file) {
     alert("Selecciona un video primero.");
@@ -166,8 +168,8 @@
       fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=guardar&tipo=video'
         + '&titulo=' + encodeURIComponent(tituloUsuario)
         + '&link=' + encodeURIComponent(directLink)
-        + '&autor=' + encodeURIComponent(autorPredeterminado)
-        + '&correo=' + encodeURIComponent(correoPredeterminado)
+        + '&autor=' + encodeURIComponent(autor)
+        + '&correo=' + encodeURIComponent(correo)
         + '&descripcion=' + encodeURIComponent(descripcionUsuario), {
         method: 'GET'
       }).then(cargarPublicaciones);
@@ -253,4 +255,5 @@
     </script>
   </body>
 </html>
+
 
