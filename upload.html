@@ -150,14 +150,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
      function upload() {
   const file = document.getElementById("fileInput").files[0];
-  tituloUsuario = document.getElementById("videoTitle").value.trim();
+  const tituloUsuario = document.getElementById("videoTitle").value.trim();
   const descripcionUsuario = document.getElementById("videoDescripcion").value.trim();
 
-  // Obtener autor y correo desde localStorage (si no existen, usar los predeterminados)
-  const autorPredeterminado = "AnónimoDH";
-  const correoPredeterminado = "decom@bochicasur.edu";
-  const autor = localStorage.getItem("autor") || autorPredeterminado;
-  const correo = localStorage.getItem("correo") || correoPredeterminado;
+  // Obtener autor y correo desde la URL
+  const params = new URLSearchParams(window.location.search);
+  const autor = params.get("nombre") || "AnónimoDH"; // Se cambió a "nombre" para coincidir con la URL
+  const correo = params.get("email") || "decom@bochicasur.edu"; // Se cambió a "email" para coincidir con la URL
 
   if (!file) {
     alert("Selecciona un video primero.");
@@ -175,8 +174,8 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("copyButton").style.display = "none";
   document.getElementById("status").innerText = "";
 
-  identifier = "artistica_bochica_" + Date.now();
-  fileName = file.name;
+  const identifier = "artistica_bochica_" + Date.now();
+  const fileName = file.name;
   const accessKey = "KPJmAQCm1UyNJWqv";
   const secretKey = "9JkBrIGexGNOynyf";
 
@@ -194,7 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
   xhr.onload = function () {
     if (xhr.status === 200) {
       const fileEncoded = encodeURIComponent(fileName);
-      directLink = `https://archive.org/download/${identifier}/${fileEncoded}`;
+      const directLink = `https://archive.org/download/${identifier}/${fileEncoded}`;
       document.getElementById("status").innerHTML = `
         <p>✅ Publicación exitosa.</p>
         <a href="${directLink}" target="_blank">🔗 Ver video</a>`;
@@ -205,8 +204,8 @@ document.addEventListener("DOMContentLoaded", () => {
       fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=guardar&tipo=video'
         + '&titulo=' + encodeURIComponent(tituloUsuario)
         + '&link=' + encodeURIComponent(directLink)
-        + '&autor=' + encodeURIComponent(autor)
-        + '&correo=' + encodeURIComponent(correo)
+        + '&autor=' + encodeURIComponent(autor) // Ahora usa el valor de la URL
+        + '&correo=' + encodeURIComponent(correo) // Ahora usa el valor de la URL
         + '&descripcion=' + encodeURIComponent(descripcionUsuario), {
         method: 'GET'
       }).then(cargarPublicaciones);
@@ -292,6 +291,7 @@ document.addEventListener("DOMContentLoaded", () => {
     </script>
   </body>
 </html>
+
 
 
 
