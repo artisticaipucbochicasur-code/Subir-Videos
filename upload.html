@@ -44,8 +44,12 @@
     </style>
   </head>
   <body>
-
-<form id="uploadForm" onsubmit="event.preventDefault(); upload();">
+    <div class="logo-container">
+      <img src="logo.png" alt="Logo" />
+    </div>
+    <main>
+      <h2>DECOM BOCHICA SUR</h2>
+    <form id="uploadForm" onsubmit="event.preventDefault(); upload();">
   <div class="input-group">
     <label for="videoTitle">Título del video <span style="color: #e53e3e">*</span></label>
     <input type="text" id="videoTitle" placeholder="Escribe el título del video" maxlength="80" required />
@@ -53,28 +57,13 @@
 
   <div class="input-group">
     <label for="videoDescripcion">Descripción del video</label>
-    <input type="text" id="videoDescripcion" placeholder="Escribe una breve descripción (opcional)" maxlength="200" />
+    <input type="text" id="videoDescripcion" placeholder="Agrega una breve descripción" maxlength="200" />
   </div>
 
   <input type="file" id="fileInput" accept="video/*" required />
   <button type="submit">📤 Subir video</button>
 </form>
 
-
-    
-    <div class="logo-container">
-      <img src="logo.png" alt="Logo" />
-    </div>
-    <main>
-      <h2>DECOM BOCHICA SUR</h2>
-      <form id="uploadForm" onsubmit="event.preventDefault(); upload();">
-        <div class="input-group">
-          <label for="videoTitle">Título del video <span style="color: #e53e3e">*</span></label>
-          <input type="text" id="videoTitle" placeholder="Escribe el título del video" maxlength="80" required />
-        </div>
-        <input type="file" id="fileInput" accept="video/*" required />
-        <button type="submit">📤 Subir video</button>
-      </form>
       <div id="progressContainer">
         <div id="progressBar">
           <div id="progress"></div>
@@ -122,14 +111,14 @@
           });
       }
 
-   function upload() {
+     function upload() {
   const file = document.getElementById("fileInput").files[0];
   tituloUsuario = document.getElementById("videoTitle").value.trim();
   const descripcionUsuario = document.getElementById("videoDescripcion").value.trim();
 
-  // 🔹 Autor y correo predeterminados
-  const autorPredeterminado = "Autor Demo";
-  const correoPredeterminado = "correo@demo.com";
+  // Autor y correo predeterminados
+  const autorPredeterminado = "DECOM Bochica";
+  const correoPredeterminado = "decom@colegio.edu";
 
   if (!file) {
     alert("Selecciona un video primero.");
@@ -173,7 +162,7 @@
       document.getElementById("copyButton").style.display = "inline-block";
       document.getElementById("retryButton").style.display = "none";
 
-      // 🔹 Ahora enviamos titulo, link, descripcion, autor y correo
+      // Guardar en Google Sheets incluyendo autor, correo y descripción
       fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=guardar&tipo=video'
         + '&titulo=' + encodeURIComponent(tituloUsuario)
         + '&link=' + encodeURIComponent(directLink)
@@ -206,7 +195,6 @@
 
   xhr.send(file);
 }
-
 
 
       function copiar() {
@@ -265,7 +253,4 @@
     </script>
   </body>
 </html>
-
-
-
 
