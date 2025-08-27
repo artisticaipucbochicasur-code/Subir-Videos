@@ -87,33 +87,39 @@
     </main>
     <script>
 
-// === Escuchar datos de App Inventor y guardarlos en localStorage ===
+// 0) Si vienen por querystring (?name=&email=), guardarlos
 document.addEventListener("DOMContentLoaded", () => {
+  const qs = new URLSearchParams(location.search);
+  const qName  = qs.get("name");
+  const qEmail = qs.get("email");
+  if (qName)  localStorage.setItem("autor",  qName);
+  if (qEmail) localStorage.setItem("correo", qEmail);
+
+  // 1) Pedir a App Inventor que envíe los datos de usuario
+  try { window.AppInventor?.setWebViewString?.("REQUEST_USER_DATA"); } catch(e) {}
+
+  // 2) Escuchar datos de App Inventor y guardarlos en localStorage
   if (window.AppInventor) {
     setInterval(() => {
       const comando = window.AppInventor.getWebViewString?.();
-      if (comando) {
-        try {
-          const data = JSON.parse(comando);
-          if (data.action === "updateUserData") {
-            const currentAuthorEmail = data.email;
-            const currentAuthorName = data.name;
+      if (!comando) return;
 
-            // Guardar en localStorage
-            localStorage.setItem("autor", currentAuthorName || "");
-            localStorage.setItem("correo", currentAuthorEmail || "");
-
-            console.log(
-              `Datos de usuario actualizados en upload.html -> Nombre: ${currentAuthorName}, Correo: ${currentAuthorEmail}`
-            );
-          }
-        } catch (e) {
-          // Ignorar comandos no JSON
+      try {
+        const data = JSON.parse(comando);
+        if (data.action === "updateUserData") {
+          const currentAuthorName  = data.name  || "";
+          const currentAuthorEmail = data.email || "";
+          if (currentAuthorName)  localStorage.setItem("autor",  currentAuthorName);
+          if (currentAuthorEmail) localStorage.setItem("correo", currentAuthorEmail);
+          console.log("upload.html: datos recibidos de AppInventor", currentAuthorName, currentAuthorEmail);
         }
+      } catch (e) {
+        // no era JSON, lo ignoramos
       }
     }, 500);
   }
 });
+
 
 
       
@@ -286,6 +292,7 @@ document.addEventListener("DOMContentLoaded", () => {
     </script>
   </body>
 </html>
+
 
 
 
