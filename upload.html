@@ -86,6 +86,37 @@
       </div>
     </main>
     <script>
+
+// === Escuchar datos de App Inventor y guardarlos en localStorage ===
+document.addEventListener("DOMContentLoaded", () => {
+  if (window.AppInventor) {
+    setInterval(() => {
+      const comando = window.AppInventor.getWebViewString?.();
+      if (comando) {
+        try {
+          const data = JSON.parse(comando);
+          if (data.action === "updateUserData") {
+            const currentAuthorEmail = data.email;
+            const currentAuthorName = data.name;
+
+            // Guardar en localStorage
+            localStorage.setItem("autor", currentAuthorName || "");
+            localStorage.setItem("correo", currentAuthorEmail || "");
+
+            console.log(
+              `Datos de usuario actualizados en upload.html -> Nombre: ${currentAuthorName}, Correo: ${currentAuthorEmail}`
+            );
+          }
+        } catch (e) {
+          // Ignorar comandos no JSON
+        }
+      }
+    }, 500);
+  }
+});
+
+
+      
       let directLink = "";
       let identifier = "";
       let fileName = "";
@@ -255,5 +286,6 @@
     </script>
   </body>
 </html>
+
 
 
