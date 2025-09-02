@@ -177,9 +177,15 @@ async function upload() {
   document.getElementById("status").innerText = "⏳ Preparando compresión...";
 
   // --- COMPRESIÓN CON FFMPEG.WASM ---
+  if (typeof FFmpeg === "undefined") {
+    alert("❌ No se pudo cargar FFmpeg.");
+    return;
+  }
+
   const { createFFmpeg, fetchFile } = FFmpeg;
   const ffmpeg = createFFmpeg({
     log: true,
+    corePath: "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js",
     progress: ({ ratio }) => {
       const percent = Math.min(100, Math.round(ratio * 100));
       document.getElementById("progress").style.width = percent + "%";
@@ -188,9 +194,9 @@ async function upload() {
   });
 
   if (!ffmpeg.isLoaded()) {
-    console.log("Cargando ffmpeg...");
+    document.getElementById("status").innerText = "⏳ Cargando librería de compresión...";
     await ffmpeg.load();
-    console.log("FFmpeg cargado correctamente.");
+    console.log("✅ FFmpeg cargado correctamente.");
   }
 
   const inputName = "input.mp4";
@@ -279,6 +285,7 @@ async function upload() {
 
 
 
+
       function copiar() {
         if (!directLink) return;
         navigator.clipboard
@@ -335,6 +342,7 @@ async function upload() {
     </script>
   </body>
 </html>
+
 
 
 
