@@ -155,6 +155,9 @@ document.addEventListener("DOMContentLoaded", () => {
           });
       }
 
+
+console.log("FFmpeg cargado?", typeof FFmpeg);
+     
 async function upload() {
   const file = document.getElementById("fileInput").files[0];
   const tituloUsuario = document.getElementById("videoTitle").value.trim();
@@ -348,6 +351,7 @@ async function upload() {
     </script>
   </body>
 </html>
+
 
 
 
