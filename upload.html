@@ -149,7 +149,6 @@ document.addEventListener("DOMContentLoaded", () => {
           });
       }
 
-    // Reemplazar la función upload() completa por esta versión comprimida
 async function upload() {
   const file = document.getElementById("fileInput").files[0];
   const tituloUsuario = document.getElementById("videoTitle").value.trim();
@@ -172,19 +171,33 @@ async function upload() {
 
   document.getElementById("retryButton").style.display = "none";
   document.getElementById("copyButton").style.display = "none";
-  document.getElementById("status").innerText = "⏳ Comprimiendo video al 30%...";
+  document.getElementById("progressContainer").style.display = "block";
+  document.getElementById("progress").style.width = "0%";
+  document.getElementById("status").innerText = "⏳ Preparando compresión...";
 
   // --- COMPRESIÓN CON FFMPEG.WASM ---
   const { createFFmpeg, fetchFile } = FFmpeg;
-  const ffmpeg = createFFmpeg({ log: true });
-  if (!ffmpeg.isLoaded()) await ffmpeg.load();
+  const ffmpeg = createFFmpeg({
+    log: true,
+    progress: ({ ratio }) => {
+      const percent = Math.min(100, Math.round(ratio * 100));
+      document.getElementById("progress").style.width = percent + "%";
+      document.getElementById("status").innerText = `⏳ Comprimiendo video... ${percent}%`;
+    }
+  });
+
+  if (!ffmpeg.isLoaded()) {
+    console.log("Cargando ffmpeg...");
+    await ffmpeg.load();
+    console.log("FFmpeg cargado correctamente.");
+  }
 
   const inputName = "input.mp4";
   const outputName = "output.mp4";
 
   ffmpeg.FS("writeFile", inputName, await fetchFile(file));
 
-  // Escala de calidad: CRF 30 (más alto = más compresión), bitrate reducido
+  console.log("Iniciando compresión con ffmpeg...");
   await ffmpeg.run(
     "-i", inputName,
     "-b:v", "800k",
@@ -192,10 +205,13 @@ async function upload() {
     "-preset", "fast",
     outputName
   );
+  console.log("Compresión terminada.");
 
   const data = ffmpeg.FS("readFile", outputName);
   const compressedFile = new File([data.buffer], "compressed_" + file.name, { type: "video/mp4" });
 
+  // Reinicia la barra para la subida
+  document.getElementById("progress").style.width = "0%";
   document.getElementById("status").innerText = "⏳ Subiendo video comprimido...";
 
   // --- SUBIDA A ARCHIVE.ORG ---
@@ -209,12 +225,13 @@ async function upload() {
   xhr.upload.onprogress = function (event) {
     if (event.lengthComputable) {
       const percent = (event.loaded / event.total) * 100;
-      document.getElementById("progressContainer").style.display = "block";
       document.getElementById("progress").style.width = percent + "%";
+      document.getElementById("status").innerText = `⏳ Subiendo video... ${Math.round(percent)}%`;
     }
   };
 
   xhr.onload = function () {
+    console.log("Respuesta del servidor:", xhr.status, xhr.responseText);
     if (xhr.status === 200) {
       const fileEncoded = encodeURIComponent(fileName);
       directLink = `https://archive.org/download/${identifier}/${fileEncoded}`;
@@ -240,6 +257,7 @@ async function upload() {
   };
 
   xhr.onerror = function () {
+    console.error("Error de red:", xhr);
     document.getElementById("status").innerText = "❌ Error de red al subir el archivo.";
     document.getElementById("retryButton").style.display = "inline-block";
   };
@@ -256,6 +274,7 @@ async function upload() {
 
   xhr.send(compressedFile);
 }
+
 
 
 
@@ -315,6 +334,7 @@ async function upload() {
     </script>
   </body>
 </html>
+
 
 
 
