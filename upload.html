@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
+ <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Subir video a DECOM</title>
@@ -42,8 +42,13 @@
         label { font-size: 16px; }
       }
     </style>
-     <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js"></script>
-  </head>
+
+    <!-- Cargar FFmpeg.wasm con fallback -->
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js"
+            onerror="this.onerror=null; this.src='https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js';">
+    </script>
+</head>
+
   
   <body>
     <div class="logo-container">
@@ -342,6 +347,7 @@ async function upload() {
     </script>
   </body>
 </html>
+
 
 
 
