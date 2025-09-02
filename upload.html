@@ -185,21 +185,22 @@ async function upload() {
   document.getElementById("status").innerText = "⏳ Preparando compresión...";
 
   // --- COMPRESIÓN CON FFMPEG.WASM ---
-  if (typeof FFmpeg === "undefined") {
-    alert("❌ No se pudo cargar FFmpeg.");
-    return;
-  }
+// --- COMPRESIÓN CON FFMPEG.WASM ---
+if (typeof createFFmpeg === "undefined" || typeof fetchFile === "undefined") {
+  alert("❌ No se pudo cargar FFmpeg.");
+  return;
+}
 
-  const { createFFmpeg, fetchFile } = FFmpeg;
-  const ffmpeg = createFFmpeg({
-    log: true,
-    corePath: "https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js",
-    progress: ({ ratio }) => {
-      const percent = Math.min(100, Math.round(ratio * 100));
-      document.getElementById("progress").style.width = percent + "%";
-      document.getElementById("status").innerText = `⏳ Comprimiendo video... ${percent}%`;
-    }
-  });
+const ffmpeg = createFFmpeg({
+  log: true,
+  corePath: "https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js",
+  progress: ({ ratio }) => {
+    const percent = Math.min(100, Math.round(ratio * 100));
+    document.getElementById("progress").style.width = percent + "%";
+    document.getElementById("status").innerText = `⏳ Comprimiendo video... ${percent}%`;
+  }
+});
+
 
   if (!ffmpeg.isLoaded()) {
     document.getElementById("status").innerText = "⏳ Cargando librería de compresión...";
@@ -351,6 +352,7 @@ async function upload() {
     </script>
   </body>
 </html>
+
 
 
 
