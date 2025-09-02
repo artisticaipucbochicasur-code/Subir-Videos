@@ -42,6 +42,7 @@
         label { font-size: 16px; }
       }
     </style>
+     <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js"></script>
   </head>
   <body>
     <div class="logo-container">
@@ -148,22 +149,21 @@ document.addEventListener("DOMContentLoaded", () => {
           });
       }
 
-     function upload() {
+    // Reemplazar la función upload() completa por esta versión comprimida
+async function upload() {
   const file = document.getElementById("fileInput").files[0];
   const tituloUsuario = document.getElementById("videoTitle").value.trim();
   const descripcionUsuario = document.getElementById("videoDescripcion").value.trim();
 
-  // Obtener autor y correo desde la URL
   const params = new URLSearchParams(window.location.search);
-  const autor = params.get("nombre") || "AnónimoDH"; // Se cambió a "nombre" para coincidir con la URL
-  const correo = params.get("email") || "decom@bochicasur.edu"; // Se cambió a "email" para coincidir con la URL
+  const autor = params.get("nombre") || "AnónimoDH";
+  const correo = params.get("email") || "decom@bochicasur.edu";
 
   if (!file) {
     alert("Selecciona un video primero.");
     document.getElementById("fileInput").focus();
     return;
   }
-
   if (!tituloUsuario) {
     alert("Por favor, escribe el título del video.");
     document.getElementById("videoTitle").focus();
@@ -172,13 +172,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
   document.getElementById("retryButton").style.display = "none";
   document.getElementById("copyButton").style.display = "none";
-  document.getElementById("status").innerText = "";
+  document.getElementById("status").innerText = "⏳ Comprimiendo video al 30%...";
 
+  // --- COMPRESIÓN CON FFMPEG.WASM ---
+  const { createFFmpeg, fetchFile } = FFmpeg;
+  const ffmpeg = createFFmpeg({ log: true });
+  if (!ffmpeg.isLoaded()) await ffmpeg.load();
+
+  const inputName = "input.mp4";
+  const outputName = "output.mp4";
+
+  ffmpeg.FS("writeFile", inputName, await fetchFile(file));
+
+  // Escala de calidad: CRF 30 (más alto = más compresión), bitrate reducido
+  await ffmpeg.run(
+    "-i", inputName,
+    "-b:v", "800k",
+    "-crf", "30",
+    "-preset", "fast",
+    outputName
+  );
+
+  const data = ffmpeg.FS("readFile", outputName);
+  const compressedFile = new File([data.buffer], "compressed_" + file.name, { type: "video/mp4" });
+
+  document.getElementById("status").innerText = "⏳ Subiendo video comprimido...";
+
+  // --- SUBIDA A ARCHIVE.ORG ---
   const identifier = "artistica_bochica_" + Date.now();
-  const fileName = file.name;
+  const fileName = compressedFile.name;
   const accessKey = "KPJmAQCm1UyNJWqv";
   const secretKey = "9JkBrIGexGNOynyf";
-
   const url = `https://s3.us.archive.org/${identifier}/${fileName}`;
   const xhr = new XMLHttpRequest();
 
@@ -193,19 +217,18 @@ document.addEventListener("DOMContentLoaded", () => {
   xhr.onload = function () {
     if (xhr.status === 200) {
       const fileEncoded = encodeURIComponent(fileName);
-      const directLink = `https://archive.org/download/${identifier}/${fileEncoded}`;
+      directLink = `https://archive.org/download/${identifier}/${fileEncoded}`;
       document.getElementById("status").innerHTML = `
         <p>✅ Publicación exitosa.</p>
         <a href="${directLink}" target="_blank">🔗 Ver video</a>`;
       document.getElementById("copyButton").style.display = "inline-block";
       document.getElementById("retryButton").style.display = "none";
 
-      // Guardar en Google Sheets incluyendo autor, correo y descripción
       fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=guardar&tipo=video'
         + '&titulo=' + encodeURIComponent(tituloUsuario)
         + '&link=' + encodeURIComponent(directLink)
-        + '&autor=' + encodeURIComponent(autor) // Ahora usa el valor de la URL
-        + '&correo=' + encodeURIComponent(correo) // Ahora usa el valor de la URL
+        + '&autor=' + encodeURIComponent(autor)
+        + '&correo=' + encodeURIComponent(correo)
         + '&descripcion=' + encodeURIComponent(descripcionUsuario), {
         method: 'GET'
       }).then(cargarPublicaciones);
@@ -226,13 +249,14 @@ document.addEventListener("DOMContentLoaded", () => {
   xhr.setRequestHeader("x-archive-auto-make-bucket", "1");
   xhr.setRequestHeader("x-archive-meta-title", fileName);
   xhr.setRequestHeader("x-archive-meta-mediatype", "movies");
-  xhr.setRequestHeader("x-archive-meta-description", "Video subido desde la app DECOM");
+  xhr.setRequestHeader("x-archive-meta-description", "Video subido desde la app DECOM (comprimido)");
   xhr.setRequestHeader("x-archive-meta-collection", "opensource_movies");
   xhr.setRequestHeader("x-archive-meta-creator", "artistica_bochica");
-  xhr.setRequestHeader("Content-Type", file.type);
+  xhr.setRequestHeader("Content-Type", compressedFile.type);
 
-  xhr.send(file);
+  xhr.send(compressedFile);
 }
+
 
 
       function copiar() {
@@ -291,6 +315,7 @@ document.addEventListener("DOMContentLoaded", () => {
     </script>
   </body>
 </html>
+
 
 
 
