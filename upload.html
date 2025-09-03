@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
- <head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Subir video a DECOM</title>
@@ -42,14 +42,7 @@
         label { font-size: 16px; }
       }
     </style>
-
-    <!-- Cargar FFmpeg.wasm con fallback -->
-    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js"
-            onerror="this.onerror=null; this.src='https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.6/dist/ffmpeg.min.js';">
-    </script>
-</head>
-
-  
+  </head>
   <body>
     <div class="logo-container">
       <img src="logo.png" alt="Logo" />
@@ -155,23 +148,22 @@ document.addEventListener("DOMContentLoaded", () => {
           });
       }
 
-
-console.log("FFmpeg cargado?", typeof FFmpeg);
-     
-async function upload() {
+     function upload() {
   const file = document.getElementById("fileInput").files[0];
   const tituloUsuario = document.getElementById("videoTitle").value.trim();
   const descripcionUsuario = document.getElementById("videoDescripcion").value.trim();
 
+  // Obtener autor y correo desde la URL
   const params = new URLSearchParams(window.location.search);
-  const autor = params.get("nombre") || "AnónimoDH";
-  const correo = params.get("email") || "decom@bochicasur.edu";
+  const autor = params.get("nombre") || "AnónimoDH"; // Se cambió a "nombre" para coincidir con la URL
+  const correo = params.get("email") || "decom@bochicasur.edu"; // Se cambió a "email" para coincidir con la URL
 
   if (!file) {
     alert("Selecciona un video primero.");
     document.getElementById("fileInput").focus();
     return;
   }
+
   if (!tituloUsuario) {
     alert("Por favor, escribe el título del video.");
     document.getElementById("videoTitle").focus();
@@ -180,96 +172,40 @@ async function upload() {
 
   document.getElementById("retryButton").style.display = "none";
   document.getElementById("copyButton").style.display = "none";
-  document.getElementById("progressContainer").style.display = "block";
-  document.getElementById("progress").style.width = "0%";
-  document.getElementById("status").innerText = "⏳ Preparando compresión...";
+  document.getElementById("status").innerText = "";
 
-  // --- COMPRESIÓN CON FFMPEG.WASM ---
-// --- COMPRESIÓN CON FFMPEG.WASM ---
-if (typeof createFFmpeg === "undefined" || typeof fetchFile === "undefined") {
-  alert("❌ No se pudo cargar FFmpeg.");
-  return;
-}
-
-// --- COMPRESIÓN CON FFMPEG.WASM ---
-if (typeof FFmpeg === "undefined" || !FFmpeg.createFFmpeg) {
-  alert("❌ No se pudo cargar FFmpeg.");
-  return;
-}
-
-const { createFFmpeg, fetchFile } = FFmpeg;
-
-const ffmpeg = createFFmpeg({
-  log: true,
-  corePath: "https://unpkg.com/@ffmpeg/core@0.12.6/dist/ffmpeg-core.js",
-  progress: ({ ratio }) => {
-    const percent = Math.min(100, Math.round(ratio * 100));
-    document.getElementById("progress").style.width = percent + "%";
-    document.getElementById("status").innerText = `⏳ Comprimiendo video... ${percent}%`;
-  }
-});
-
-if (!ffmpeg.isLoaded()) {
-  document.getElementById("status").innerText = "⏳ Cargando librería de compresión...";
-  await ffmpeg.load();
-  console.log("✅ FFmpeg cargado correctamente.");
-}
-
-
-  const inputName = "input.mp4";
-  const outputName = "output.mp4";
-
-  ffmpeg.FS("writeFile", inputName, await fetchFile(file));
-
-  console.log("Iniciando compresión con ffmpeg...");
-  await ffmpeg.run(
-    "-i", inputName,
-    "-b:v", "800k",
-    "-crf", "30",
-    "-preset", "fast",
-    outputName
-  );
-  console.log("Compresión terminada.");
-
-  const data = ffmpeg.FS("readFile", outputName);
-  const compressedFile = new File([data.buffer], "compressed_" + file.name, { type: "video/mp4" });
-
-  // Reinicia la barra para la subida
-  document.getElementById("progress").style.width = "0%";
-  document.getElementById("status").innerText = "⏳ Subiendo video comprimido...";
-
-  // --- SUBIDA A ARCHIVE.ORG ---
   const identifier = "artistica_bochica_" + Date.now();
-  const fileName = compressedFile.name;
+  const fileName = file.name;
   const accessKey = "KPJmAQCm1UyNJWqv";
   const secretKey = "9JkBrIGexGNOynyf";
+
   const url = `https://s3.us.archive.org/${identifier}/${fileName}`;
   const xhr = new XMLHttpRequest();
 
   xhr.upload.onprogress = function (event) {
     if (event.lengthComputable) {
       const percent = (event.loaded / event.total) * 100;
+      document.getElementById("progressContainer").style.display = "block";
       document.getElementById("progress").style.width = percent + "%";
-      document.getElementById("status").innerText = `⏳ Subiendo video... ${Math.round(percent)}%`;
     }
   };
 
   xhr.onload = function () {
-    console.log("Respuesta del servidor:", xhr.status, xhr.responseText);
     if (xhr.status === 200) {
       const fileEncoded = encodeURIComponent(fileName);
-      directLink = `https://archive.org/download/${identifier}/${fileEncoded}`;
+      const directLink = `https://archive.org/download/${identifier}/${fileEncoded}`;
       document.getElementById("status").innerHTML = `
         <p>✅ Publicación exitosa.</p>
         <a href="${directLink}" target="_blank">🔗 Ver video</a>`;
       document.getElementById("copyButton").style.display = "inline-block";
       document.getElementById("retryButton").style.display = "none";
 
+      // Guardar en Google Sheets incluyendo autor, correo y descripción
       fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=guardar&tipo=video'
         + '&titulo=' + encodeURIComponent(tituloUsuario)
         + '&link=' + encodeURIComponent(directLink)
-        + '&autor=' + encodeURIComponent(autor)
-        + '&correo=' + encodeURIComponent(correo)
+        + '&autor=' + encodeURIComponent(autor) // Ahora usa el valor de la URL
+        + '&correo=' + encodeURIComponent(correo) // Ahora usa el valor de la URL
         + '&descripcion=' + encodeURIComponent(descripcionUsuario), {
         method: 'GET'
       }).then(cargarPublicaciones);
@@ -281,7 +217,6 @@ if (!ffmpeg.isLoaded()) {
   };
 
   xhr.onerror = function () {
-    console.error("Error de red:", xhr);
     document.getElementById("status").innerText = "❌ Error de red al subir el archivo.";
     document.getElementById("retryButton").style.display = "inline-block";
   };
@@ -291,17 +226,13 @@ if (!ffmpeg.isLoaded()) {
   xhr.setRequestHeader("x-archive-auto-make-bucket", "1");
   xhr.setRequestHeader("x-archive-meta-title", fileName);
   xhr.setRequestHeader("x-archive-meta-mediatype", "movies");
-  xhr.setRequestHeader("x-archive-meta-description", "Video subido desde la app DECOM (comprimido)");
+  xhr.setRequestHeader("x-archive-meta-description", "Video subido desde la app DECOM");
   xhr.setRequestHeader("x-archive-meta-collection", "opensource_movies");
   xhr.setRequestHeader("x-archive-meta-creator", "artistica_bochica");
-  xhr.setRequestHeader("Content-Type", compressedFile.type);
+  xhr.setRequestHeader("Content-Type", file.type);
 
-  xhr.send(compressedFile);
+  xhr.send(file);
 }
-
-
-
-
 
 
       function copiar() {
@@ -360,17 +291,6 @@ if (!ffmpeg.isLoaded()) {
     </script>
   </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
 
 
 
