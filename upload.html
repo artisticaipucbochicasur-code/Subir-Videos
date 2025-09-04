@@ -1,201 +1,154 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Subir video a DECOM</title>
-    <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet" />
-    <style>
-      * { box-sizing: border-box; }
-      body { margin: 0; font-family: "Segoe UI", sans-serif; background-color: #f0f4f8; color: #333; position: relative; padding-top: 160px; }
-      .logo-container { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-height: 200px; z-index: 2; text-align: center; background-color: transparent; }
-      .logo-container img { max-width: 100%; height: auto; object-fit: contain; }
-      main { max-width: 1200px; width: 95%; margin: 0 auto; background-color: #fff; border-radius: 14px; padding: 30px 25px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1); text-align: center; position: relative; z-index: 1; }
-      h2 { font-family: 'Luckiest Guy', cursive; font-size: 36px; margin-bottom: 30px; color: #2b6cb0; }
-      .input-group { margin-bottom: 20px; text-align: left; }
-      label { display: block; margin-bottom: 8px; font-weight: bold; color: #2b6cb0; font-size: 18px; }
-      input[type="file"] { padding: 18px; font-size: 18px; width: 100%; border-radius: 10px; margin-bottom: 20px; border: 2px dashed #90cdf4; background-color: #ebf8ff; }
-      input[type="text"] { padding: 16px; font-size: 18px; width: 100%; border-radius: 10px; border: 2px solid #90cdf4; background-color: #ebf8ff; margin-bottom: 10px; box-sizing: border-box; }
-      input[type="text"]:required { border-color: #e53e3e; }
-      button { padding: 16px 24px; font-size: 20px; background-color: #2b6cb0; color: white; border: none; border-radius: 10px; cursor: pointer; width: 100%; margin-bottom: 15px; transition: background-color 0.3s ease, transform 0.2s ease; }
-      button:hover { background-color: #2c5282; transform: scale(1.02); }
-      #copyButton { background-color: #38a169; }
-      #copyButton:hover { background-color: #2f855a; }
-      #retryButton { background-color: #e53e3e; display: none; }
-      #retryButton:hover { background-color: #c53030; }
-      #progressContainer { width: 100%; margin-top: 20px; display: none; }
-      #progressBar { width: 100%; height: 20px; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; }
-      #progress { height: 100%; width: 0%; background-color: #3182ce; transition: width 0.3s ease; }
-      #status { margin-top: 20px; font-size: 16px; color: #444; }
-      .note { font-size: 16px; color: #555; margin-top: 30px; background-color: #edf2f7; padding: 20px; border-radius: 10px; line-height: 1.6; }
-      a { color: #2b6cb0; word-break: break-word; font-size: 14px; }
-      select { padding: 12px; font-size: 16px; border-radius: 8px; border: 2px solid #90cdf4; margin-bottom: 10px; width: 100%; max-width: 400px; }
-      @media (max-width: 600px) {
-        body { padding-top: 140px; }
-        h2 { font-size: 28px; }
-        input[type="file"], input[type="text"], button, select { font-size: 16px; padding: 14px; }
-        .note { font-size: 14px; }
-        label { font-size: 16px; }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subir Videos</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #d8f3dc, #95d5b2);
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+    }
+    h1 {
+      font-family: "Luckiest Guy", cursive;
+      color: #081c15;
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
+    main {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 500px;
+      margin: auto;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    input,
+    textarea,
+    button,
+    select {
+      display: block;
+      width: 90%;
+      margin: 10px auto;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+    button {
+      background: #1b4332;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #081c15;
+    }
+    #progressContainer {
+      width: 90%;
+      background: #ccc;
+      margin: 10px auto;
+      height: 20px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    #progressBar {
+      height: 100%;
+      width: 0;
+      background: #40916c;
+      transition: width 0.3s;
+    }
+    #mensaje {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    @media (max-width: 600px) {
+      main {
+        width: 95%;
       }
-    </style>
-  </head>
-  <body>
-    <div class="logo-container">
-      <img src="logo.png" alt="Logo" />
+    }
+  </style>
+</head>
+<body>
+  <h1>Subir Videos</h1>
+  <main>
+    <input type="file" id="fileInput" accept="video/*" />
+    <input type="text" id="titulo" placeholder="Título del video" />
+    <textarea id="descripcion" placeholder="Descripción"></textarea>
+    <button onclick="upload()">Subir Video</button>
+
+    <div id="progressContainer">
+      <div id="progressBar"></div>
     </div>
-    <main>
-      <h2>DECOM BOCHICA SUR</h2>
-      <form id="uploadForm" onsubmit="event.preventDefault(); upload();">
-        <div class="input-group">
-          <label for="videoTitle">Título del video <span style="color: #e53e3e">*</span></label>
-          <input type="text" id="videoTitle" placeholder="Escribe el título del video" maxlength="80" required />
-        </div>
 
-        <div class="input-group">
-          <label for="videoDescripcion">Descripción del video</label>
-          <input type="text" id="videoDescripcion" placeholder="Agrega una breve descripción" maxlength="200" />
-        </div>
+    <p id="mensaje"></p>
+  </main>
 
-        <input type="file" id="fileInput" accept="video/*" required />
-        <button type="submit">📤 Subir video</button>
-      </form>
+  <script>
+    const scriptUrl =
+      "https://script.google.com/macros/s/AKfycbzeW2nNEgguKyHPcUGfJ7vu-qKdk3K_cH4DsMf2pkr-5TY9VZk6ErH4yFiXq8iZcBVK/exec";
 
-      <div id="progressContainer">
-        <div id="progressBar">
-          <div id="progress"></div>
-        </div>
-      </div>
-      <div id="status"></div>
-      <button id="copyButton" onclick="copiar()">📋 Copiar link directo</button>
-      <button id="retryButton" onclick="upload()">🔁 Reintentar</button>
+    function upload() {
+      const file = document.getElementById("fileInput").files[0];
+      const titulo = document.getElementById("titulo").value;
+      const descripcion = document.getElementById("descripcion").value;
+      if (!file || !titulo || !descripcion) {
+        alert("Completa todos los campos");
+        return;
+      }
 
-      <div class="note">
-        🔄 Por favor, espera hasta que el video se suba completamente.<br /><br />
-        📋 La publicación será guardado automáticamente en DECOM.<br /><br />
-        ✅ Luego ve a <strong>“Videos”</strong> en la app para visualizar.<br /><br />
-        Desarrollada por: DEIMER HERRERA.
-      </div>
-    </main>
-    <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const qs = new URLSearchParams(location.search);
-  const qName  = qs.get("name");
-  const qEmail = qs.get("email");
-  if (qName)  localStorage.setItem("autor",  qName);
-  if (qEmail) localStorage.setItem("correo", qEmail);
+      const xhr = new XMLHttpRequest();
+      const url = `https://s3.us.archive.org/${encodeURIComponent(
+        file.name
+      )}`;
+      xhr.open("PUT", url, true);
+      xhr.setRequestHeader(
+        "authorization",
+        "LOW tuAccessKey:tuSecretKey"
+      );
 
-  try { window.AppInventor?.setWebViewString?.("REQUEST_USER_DATA"); } catch(e) {}
-
-  if (window.AppInventor) {
-    setInterval(() => {
-      const comando = window.AppInventor.getWebViewString?.();
-      if (!comando) return;
-      try {
-        const data = JSON.parse(comando);
-        if (data.action === "updateUserData") {
-          const currentAuthorName  = data.name  || "";
-          const currentAuthorEmail = data.email || "";
-          if (currentAuthorName)  localStorage.setItem("autor",  currentAuthorName);
-          if (currentAuthorEmail) localStorage.setItem("correo", currentAuthorEmail);
-          console.log("upload.html: datos recibidos de AppInventor", currentAuthorName, currentAuthorEmail);
+      xhr.upload.onprogress = function (e) {
+        if (e.lengthComputable) {
+          const percent = (e.loaded / e.total) * 100;
+          document.getElementById("progressBar").style.width =
+            percent + "%";
         }
-      } catch (e) {}
-    }, 500);
-  }
-});
+      };
 
-let directLink = "";
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          document.getElementById("mensaje").innerText =
+            "Video subido correctamente ✅";
 
-function upload() {
-  const file = document.getElementById("fileInput").files[0];
-  const tituloUsuario = document.getElementById("videoTitle").value.trim();
-  const descripcionUsuario = document.getElementById("videoDescripcion").value.trim();
+          const link = `https://archive.org/download/${encodeURIComponent(
+            file.name
+          )}/${encodeURIComponent(file.name)}`;
 
-  const params = new URLSearchParams(window.location.search);
-  const autor = params.get("nombre") || "AnónimoDH";
-  const correo = params.get("email") || "decom@bochicasur.edu";
+          // Guardar en Google Sheets
+          fetch(
+            `${scriptUrl}?accion=guardar&titulo=${encodeURIComponent(
+              titulo
+            )}&link=${encodeURIComponent(
+              link
+            )}&descripcion=${encodeURIComponent(descripcion)}`,
+            { mode: "no-cors" }
+          );
+        } else {
+          document.getElementById("mensaje").innerText =
+            "Error al subir el video ❌";
+        }
+      };
 
-  if (!file) {
-    alert("Selecciona un video primero.");
-    document.getElementById("fileInput").focus();
-    return;
-  }
-
-  if (!tituloUsuario) {
-    alert("Por favor, escribe el título del video.");
-    document.getElementById("videoTitle").focus();
-    return;
-  }
-
-  document.getElementById("retryButton").style.display = "none";
-  document.getElementById("copyButton").style.display = "none";
-  document.getElementById("status").innerText = "";
-
-  const identifier = "artistica_bochica_" + Date.now();
-  const fileName = file.name;
-  const accessKey = "KPJmAQCm1UyNJWqv";
-  const secretKey = "9JkBrIGexGNOynyf";
-
-  const url = `https://s3.us.archive.org/${identifier}/${fileName}`;
-  const xhr = new XMLHttpRequest();
-
-  xhr.upload.onprogress = function (event) {
-    if (event.lengthComputable) {
-      const percent = (event.loaded / event.total) * 100;
-      document.getElementById("progressContainer").style.display = "block";
-      document.getElementById("progress").style.width = percent + "%";
+      xhr.send(file);
     }
-  };
-
-  xhr.onload = function () {
-    if (xhr.status === 200) {
-      const fileEncoded = encodeURIComponent(fileName);
-      directLink = `https://archive.org/download/${identifier}/${fileEncoded}`;
-      document.getElementById("status").innerHTML = `
-        <p>✅ Publicación exitosa.</p>
-        <a href="${directLink}" target="_blank">🔗 Ver video</a>`;
-      document.getElementById("copyButton").style.display = "inline-block";
-      document.getElementById("retryButton").style.display = "none";
-
-      fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=guardar&tipo=video'
-        + '&titulo=' + encodeURIComponent(tituloUsuario)
-        + '&link=' + encodeURIComponent(directLink)
-        + '&autor=' + encodeURIComponent(autor)
-        + '&correo=' + encodeURIComponent(correo)
-        + '&descripcion=' + encodeURIComponent(descripcionUsuario), {
-        method: 'GET'
-      });
-    } else {
-      document.getElementById("status").innerText = "❌ Error al subir: " + xhr.responseText;
-      document.getElementById("retryButton").style.display = "inline-block";
-    }
-  };
-
-  xhr.onerror = function () {
-    document.getElementById("status").innerText = "❌ Error de red al subir el archivo.";
-    document.getElementById("retryButton").style.display = "inline-block";
-  };
-
-  xhr.open("PUT", url, true);
-  xhr.setRequestHeader("Authorization", `LOW ${accessKey}:${secretKey}`);
-  xhr.setRequestHeader("x-archive-auto-make-bucket", "1");
-  xhr.setRequestHeader("x-archive-meta-title", fileName);
-  xhr.setRequestHeader("x-archive-meta-mediatype", "movies");
-  xhr.setRequestHeader("x-archive-meta-description", "Video subido desde la app DECOM");
-  xhr.setRequestHeader("x-archive-meta-collection", "opensource_movies");
-  xhr.setRequestHeader("x-archive-meta-creator", "artistica_bochica");
-  xhr.setRequestHeader("Content-Type", file.type);
-
-  xhr.send(file);
-}
-
-function copiar() {
-  if (!directLink) return;
-  navigator.clipboard
-    .writeText(directLink)
-    .then(() => alert("✅ Link copiado al portapapeles"))
-    .catch(() => alert("❌ No se pudo copiar"));
-}
-    </script>
-  </body>
+  </script>
+</body>
 </html>
