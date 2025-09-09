@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Subir video a DECOM</title>
   <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <!-- CDN principal de Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous">
+  <!-- Fallback local para Font Awesome (descarga el archivo y súbelo a tu repositorio) -->
+  <link rel="stylesheet" href="fontawesome/all.min.css" onerror="console.warn('Font Awesome CDN falló, intentando fallback local')">
   <style>
     * { box-sizing: border-box; }
     body {
@@ -38,12 +41,28 @@
       gap: 15px;
     }
     .nav-icons button {
+      display: flex;
+      align-items: center;
+      gap: 5px;
       background: none;
       border: none;
       color: white;
-      font-size: 20px;
+      font-size: 18px;
       cursor: pointer;
       transition: color 0.3s;
+      padding: 5px;
+      min-width: 60px; /* Asegura que los botones tengan espacio */
+      text-align: center;
+    }
+    .nav-icons button i {
+      font-size: 20px;
+    }
+    .nav-icons button span {
+      font-size: 14px;
+      display: none; /* Oculta el texto por defecto */
+    }
+    .nav-icons button.no-icon span {
+      display: inline; /* Muestra el texto si el ícono no carga */
     }
     .nav-icons button:hover {
       color: #1e90ff;
@@ -198,6 +217,10 @@
       label {
         font-size: 16px;
       }
+      .nav-icons button span {
+        display: inline; /* Muestra el texto en pantallas pequeñas */
+        font-size: 12px;
+      }
     }
   </style>
 </head>
@@ -207,12 +230,15 @@
     <nav class="nav-icons">
       <button id="publicar-btn" title="Publicar" class="active">
         <i class="fas fa-plus-circle"></i>
+        <span>Publicar</span>
       </button>
       <button id="anuncios-btn" title="Anuncios">
         <i class="fas fa-bullhorn"></i>
+        <span>Anuncios</span>
       </button>
       <button id="videos-btn" title="Videos">
         <i class="fas fa-video"></i>
+        <span>Videos</span>
       </button>
     </nav>
   </header>
@@ -249,6 +275,9 @@
   <script>
     function navigateTo(url) {
       window.location.href = url;
+      // Actualizar clase active dinámicamente
+      document.querySelectorAll('.nav-icons button').forEach(btn => btn.classList.remove('active'));
+      event.currentTarget.classList.add('active');
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -258,14 +287,32 @@
       if (qName) localStorage.setItem("autor", qName);
       if (qEmail) localStorage.setItem("correo", qEmail);
 
-      document.getElementById("publicar-btn").addEventListener("click", () => {
+      // Detectar si Font Awesome no cargó y mostrar texto como fallback
+      const buttons = document.querySelectorAll('.nav-icons button');
+      buttons.forEach(button => {
+        const icon = button.querySelector('i');
+        if (!icon || !window.getComputedStyle(icon).fontFamily.includes('Font Awesome')) {
+          button.classList.add('no-icon');
+        }
+      });
+
+      document.getElementById("publicar-btn").addEventListener("click", (e) => {
         navigateTo("https://artisticaipucbochicasur-code.github.io/Subir-Videos/upload.html");
+        e.currentTarget.classList.add('active');
+        document.getElementById("anuncios-btn").classList.remove('active');
+        document.getElementById("videos-btn").classList.remove('active');
       });
-      document.getElementById("anuncios-btn").addEventListener("click", () => {
+      document.getElementById("anuncios-btn").addEventListener("click", (e) => {
         navigateTo("https://artisticaipucbochicasur-code.github.io/pase-de-fotos-vertical/fotos.html");
+        e.currentTarget.classList.add('active');
+        document.getElementById("publicar-btn").classList.remove('active');
+        document.getElementById("videos-btn").classList.remove('active');
       });
-      document.getElementById("videos-btn").addEventListener("click", () => {
+      document.getElementById("videos-btn").addEventListener("click", (e) => {
         navigateTo("https://artisticaipucbochicasur-code.github.io/slider-de-videos/sliderVideos.html");
+        e.currentTarget.classList.add('active');
+        document.getElementById("publicar-btn").classList.remove('active');
+        document.getElementById("anuncios-btn").classList.remove('active');
       });
     });
 
