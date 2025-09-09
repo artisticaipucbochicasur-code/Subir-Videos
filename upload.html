@@ -14,7 +14,7 @@
       font-family: 'Segoe UI', sans-serif;
       background: linear-gradient(135deg, #ebf8ff, #f0f4f8);
       color: #333;
-      padding-top: 220px; /* Espacio para la barra (60px) y el logo (160px) */
+      padding-top: 220px;
     }
     .social-header {
       display: flex;
@@ -111,7 +111,7 @@
       border: 2px dashed #90cdf4;
       background-color: #ebf8ff;
       transition: 0.3s ease;
-      display: none; /* Oculto porque usaremos un botón personalizado */
+      display: none;
     }
     input[type="file"]:hover {
       border-color: #2b6cb0;
@@ -294,14 +294,17 @@
         document.getElementById("anuncios-btn").classList.remove('active');
       });
 
-      // Manejar selección de archivo en WebView
+      // Manejar selección de archivo
       document.getElementById("selectFileBtn").addEventListener("click", () => {
         try {
-          window.AppInventor?.setWebViewString?.("SELECT_VIDEO");
+          window.AppInventor?.setWebViewString?.("select_video_signal");
+          // Limpiar inmediatamente para evitar que WebView lo interprete como URL
+          setTimeout(() => {
+            window.AppInventor?.setWebViewString?.("");
+          }, 100);
         } catch (e) {
           console.log("Error al solicitar file picker:", e);
-          // Fallback: Intentar usar input file en navegadores estándar
-          document.getElementById("fileInput").click();
+          document.getElementById("fileInput").click(); // Fallback para navegadores
         }
       });
 
@@ -312,11 +315,12 @@
 
       // Escuchar respuesta de App Inventor
       if (window.AppInventor) {
+        let lastProcessed = "";
         setInterval(() => {
           const response = window.AppInventor.getWebViewString?.();
-          if (response && response.startsWith("file://")) {
+          if (response && response !== "select_video_signal" && response !== lastProcessed && response.startsWith("file://")) {
+            lastProcessed = response;
             document.getElementById("status").innerText = `Archivo seleccionado: ${response.split('/').pop()}`;
-            // Guardar la ruta para usarla en upload()
             selectedFile = response;
             window.AppInventor.setWebViewString(""); // Limpiar WebViewString
           }
@@ -394,7 +398,6 @@
       xhr.setRequestHeader("Content-Type", typeof file === "string" ? "video/mp4" : file.type);
 
       if (typeof file === "string") {
-        // En WebView, obtener archivo desde la ruta
         fetch(file)
           .then(response => response.blob())
           .then(blob => xhr.send(blob))
