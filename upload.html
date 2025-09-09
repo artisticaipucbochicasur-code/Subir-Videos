@@ -129,9 +129,73 @@
         .note { font-size: 14px; }
         label { font-size: 16px; }
       }
+
+
+      .social-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #222;
+  color: white;
+  padding: 10px 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.app-name {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.nav-icons {
+  display: flex;
+  gap: 15px;
+}
+
+.nav-icons button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.nav-icons button:hover {
+  color: #1e90ff;
+}
+
+.nav-icons button.active {
+  color: #1e90ff;
+}
+
+body {
+  padding-top: 60px; /* Espacio para el encabezado fijo */
+}
     </style>
   </head>
   <body>
+
+<header class="social-header">
+  <div class="app-name">DECOM</div>
+  <nav class="nav-icons">
+    <button id="publicar-btn" title="Publicar" class="active">
+      <i class="fas fa-plus-circle"></i>
+    </button>
+    <button id="anuncios-btn" title="Anuncios">
+      <i class="fas fa-bullhorn"></i>
+    </button>
+    <button id="videos-btn" title="Videos" >
+      <i class="fas fa-video"></i>
+    </button>
+  </nav>
+</header>
+
+    
     <div class="logo-container">
       <img src="logo.png" alt="Logo" />
     </div>
@@ -169,30 +233,29 @@
     <script>
 document.addEventListener("DOMContentLoaded", () => {
   const qs = new URLSearchParams(location.search);
-  const qName  = qs.get("name");
+  const qName = qs.get("name");
   const qEmail = qs.get("email");
-  if (qName)  localStorage.setItem("autor",  qName);
+  if (qName) localStorage.setItem("autor", qName);
   if (qEmail) localStorage.setItem("correo", qEmail);
 
-  try { window.AppInventor?.setWebViewString?.("REQUEST_USER_DATA"); } catch(e) {}
-
-  if (window.AppInventor) {
-    setInterval(() => {
-      const comando = window.AppInventor.getWebViewString?.();
-      if (!comando) return;
-      try {
-        const data = JSON.parse(comando);
-        if (data.action === "updateUserData") {
-          const currentAuthorName  = data.name  || "";
-          const currentAuthorEmail = data.email || "";
-          if (currentAuthorName)  localStorage.setItem("autor",  currentAuthorName);
-          if (currentAuthorEmail) localStorage.setItem("correo", currentAuthorEmail);
-        }
-      } catch (e) {}
-    }, 500);
-  }
+  // Removemos el intento de usar REQUEST_USER_DATA, ya que no es necesario
+  // Si necesitas comunicación con App Inventor, usa un comando válido más adelante
 });
 
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("publicar-btn").addEventListener("click", () => {
+    navigateTo("https://artisticaipucbochicasur-code.github.io/Subir-Videos/upload.html");
+  });
+  document.getElementById("anuncios-btn").addEventListener("click", () => {
+    navigateTo("https://artisticaipucbochicasur-code.github.io/pase-de-fotos-vertical/fotos.html");
+  });
+  document.getElementById("videos-btn").addEventListener("click", () => {
+    navigateTo("https://artisticaipucbochicasur-code.github.io/slider-de-videos/sliderVideos.html");
+  });
+});
+
+
+      
 function upload() {
   const file = document.getElementById("fileInput").files[0];
   const tituloUsuario = document.getElementById("videoTitle").value.trim();
@@ -270,3 +333,4 @@ function upload() {
     </script>
   </body>
 </html>
+
