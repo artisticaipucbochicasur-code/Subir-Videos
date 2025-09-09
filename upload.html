@@ -14,7 +14,7 @@
       font-family: 'Segoe UI', sans-serif;
       background: linear-gradient(135deg, #ebf8ff, #f0f4f8);
       color: #333;
-      padding-top: 220px; /* Espacio para la barra de navegación (60px) y el logo (160px) */
+      padding-top: 220px; /* Espacio para la barra (60px) y el logo (160px) */
     }
     .social-header {
       display: flex;
@@ -48,7 +48,7 @@
       cursor: pointer;
       transition: color 0.3s;
       padding: 5px;
-      min-width: 60px; /* Asegura espacio clickable */
+      min-width: 60px;
     }
     .nav-icons button:hover {
       color: #1e90ff;
@@ -58,7 +58,7 @@
     }
     .logo-container {
       position: fixed;
-      top: 60px; /* Debajo de la barra de navegación */
+      top: 60px;
       left: 50%;
       transform: translateX(-50%);
       width: 100%;
@@ -111,6 +111,7 @@
       border: 2px dashed #90cdf4;
       background-color: #ebf8ff;
       transition: 0.3s ease;
+      display: none; /* Oculto porque usaremos un botón personalizado */
     }
     input[type="file"]:hover {
       border-color: #2b6cb0;
@@ -149,6 +150,12 @@
       background: linear-gradient(135deg, #2c5282, #2b6cb0);
       transform: scale(1.02);
     }
+    #selectFileBtn {
+      background: linear-gradient(135deg, #4a5568, #718096);
+    }
+    #selectFileBtn:hover {
+      background: linear-gradient(135deg, #2d3748, #4a5568);
+    }
     #progressContainer {
       width: 100%;
       margin-top: 20px;
@@ -185,7 +192,7 @@
     }
     @media (max-width: 600px) {
       body {
-        padding-top: 180px; /* Ajustado para logo y barra */
+        padding-top: 180px;
       }
       .logo-container {
         max-height: 120px;
@@ -236,6 +243,7 @@
         <input type="text" id="videoDescripcion" placeholder="Agrega una breve descripción" maxlength="200">
       </div>
       <input type="file" id="fileInput" accept="video/*" required>
+      <button type="button" id="selectFileBtn">Seleccionar video</button>
       <button type="submit">📤 Subir video</button>
     </form>
     <div id="progressContainer">
@@ -252,6 +260,8 @@
     </div>
   </main>
   <script>
+    let selectedFile = null;
+
     function navigateTo(url) {
       window.location.href = url;
       document.querySelectorAll('.nav-icons button').forEach(btn => btn.classList.remove('active'));
@@ -283,10 +293,39 @@
         document.getElementById("publicar-btn").classList.remove('active');
         document.getElementById("anuncios-btn").classList.remove('active');
       });
+
+      // Manejar selección de archivo en WebView
+      document.getElementById("selectFileBtn").addEventListener("click", () => {
+        try {
+          window.AppInventor?.setWebViewString?.("SELECT_VIDEO");
+        } catch (e) {
+          console.log("Error al solicitar file picker:", e);
+          // Fallback: Intentar usar input file en navegadores estándar
+          document.getElementById("fileInput").click();
+        }
+      });
+
+      document.getElementById("fileInput").addEventListener("change", (e) => {
+        selectedFile = e.target.files[0];
+        document.getElementById("status").innerText = selectedFile ? `Archivo seleccionado: ${selectedFile.name}` : "";
+      });
+
+      // Escuchar respuesta de App Inventor
+      if (window.AppInventor) {
+        setInterval(() => {
+          const response = window.AppInventor.getWebViewString?.();
+          if (response && response.startsWith("file://")) {
+            document.getElementById("status").innerText = `Archivo seleccionado: ${response.split('/').pop()}`;
+            // Guardar la ruta para usarla en upload()
+            selectedFile = response;
+            window.AppInventor.setWebViewString(""); // Limpiar WebViewString
+          }
+        }, 500);
+      }
     });
 
     function upload() {
-      const file = document.getElementById("fileInput").files[0];
+      const file = selectedFile || document.getElementById("fileInput").files[0];
       const tituloUsuario = document.getElementById("videoTitle").value.trim();
       const descripcionUsuario = document.getElementById("videoDescripcion").value.trim();
 
@@ -296,7 +335,7 @@
 
       if (!file) {
         alert("Selecciona un video primero.");
-        document.getElementById("fileInput").focus();
+        document.getElementById("selectFileBtn").focus();
         return;
       }
 
@@ -309,10 +348,7 @@
       document.getElementById("status").innerText = "";
 
       const identifier = "artistica_bochica_" + Date.now();
-      const fileName = file.name;
-      const accessKey = "KPJmAQCm1UyNJWqv";
-      const secretKey = "9JkBrIGexGNOynyf";
-
+      const fileName = typeof file === "string" ? file.split('/').pop() : file.name;
       const url = `https://s3.us.archive.org/${identifier}/${fileName}`;
       const xhr = new XMLHttpRequest();
 
@@ -348,16 +384,26 @@
       };
 
       xhr.open("PUT", url, true);
-      xhr.setRequestHeader("Authorization", `LOW ${accessKey}:${secretKey}`);
+      xhr.setRequestHeader("Authorization", `LOW KPJmAQCm1UyNJWqv:9JkBrIGexGNOynyf`);
       xhr.setRequestHeader("x-archive-auto-make-bucket", "1");
       xhr.setRequestHeader("x-archive-meta-title", fileName);
       xhr.setRequestHeader("x-archive-meta-mediatype", "movies");
       xhr.setRequestHeader("x-archive-meta-description", "Video subido desde la app DECOM");
       xhr.setRequestHeader("x-archive-meta-collection", "opensource_movies");
       xhr.setRequestHeader("x-archive-meta-creator", "artistica_bochica");
-      xhr.setRequestHeader("Content-Type", file.type);
+      xhr.setRequestHeader("Content-Type", typeof file === "string" ? "video/mp4" : file.type);
 
-      xhr.send(file);
+      if (typeof file === "string") {
+        // En WebView, obtener archivo desde la ruta
+        fetch(file)
+          .then(response => response.blob())
+          .then(blob => xhr.send(blob))
+          .catch(err => {
+            document.getElementById("status").innerText = "❌ Error al cargar el archivo: " + err.message;
+          });
+      } else {
+        xhr.send(file);
+      }
     }
   </script>
 </body>
