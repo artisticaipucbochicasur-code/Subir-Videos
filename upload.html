@@ -1,336 +1,348 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Subir video a DECOM</title>
-    <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet" />
-    <style>
-      * { box-sizing: border-box; }
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subir video a DECOM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #ebf8ff, #f0f4f8);
+      color: #333;
+      padding-top: 220px; /* Espacio para la barra de navegación (60px) y el logo (160px) */
+    }
+    .social-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #222;
+      color: white;
+      padding: 10px 20px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+    .app-name {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .nav-icons {
+      display: flex;
+      gap: 15px;
+    }
+    .nav-icons button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .nav-icons button:hover {
+      color: #1e90ff;
+    }
+    .nav-icons button.active {
+      color: #1e90ff;
+    }
+    .logo-container {
+      position: fixed;
+      top: 60px; /* Debajo de la barra de navegación */
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-height: 160px;
+      z-index: 999;
+      text-align: center;
+      background-color: transparent;
+    }
+    .logo-container img {
+      max-width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
+    main {
+      max-width: 900px;
+      width: 95%;
+      margin: 0 auto;
+      background-color: #fff;
+      border-radius: 16px;
+      padding: 35px 28px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    h2 {
+      font-family: 'Luckiest Guy', cursive;
+      font-size: 40px;
+      margin-bottom: 25px;
+      color: #2b6cb0;
+      letter-spacing: 1px;
+    }
+    .input-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #2b6cb0;
+      font-size: 18px;
+    }
+    input[type="file"] {
+      padding: 18px;
+      font-size: 18px;
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      border: 2px dashed #90cdf4;
+      background-color: #ebf8ff;
+      transition: 0.3s ease;
+    }
+    input[type="file"]:hover {
+      border-color: #2b6cb0;
+      background-color: #e6f0fa;
+    }
+    input[type="text"] {
+      padding: 16px;
+      font-size: 18px;
+      width: 100%;
+      border-radius: 10px;
+      border: 2px solid #90cdf4;
+      background-color: #ebf8ff;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+      transition: 0.3s ease;
+    }
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #2b6cb0;
+      background-color: #e6f0fa;
+    }
+    button {
+      padding: 16px 24px;
+      font-size: 20px;
+      background: linear-gradient(135deg, #2b6cb0, #3182ce);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      width: 100%;
+      margin-bottom: 15px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      font-weight: bold;
+    }
+    button:hover {
+      background: linear-gradient(135deg, #2c5282, #2b6cb0);
+      transform: scale(1.02);
+    }
+    #progressContainer {
+      width: 100%;
+      margin-top: 20px;
+      display: none;
+    }
+    #progressBar {
+      width: 100%;
+      height: 20px;
+      background-color: #e2e8f0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    #progress {
+      height: 100%;
+      width: 0%;
+      background-color: #3182ce;
+      transition: width 0.3s ease;
+    }
+    #status {
+      margin-top: 20px;
+      font-size: 18px;
+      color: #2d3748;
+      font-weight: bold;
+    }
+    .note {
+      font-size: 16px;
+      color: #444;
+      margin-top: 30px;
+      background-color: #edf2f7;
+      padding: 20px;
+      border-radius: 12px;
+      line-height: 1.6;
+      text-align: left;
+    }
+    @media (max-width: 600px) {
       body {
-        margin: 0;
-        font-family: "Segoe UI", sans-serif;
-        background: linear-gradient(135deg, #ebf8ff, #f0f4f8);
-        color: #333;
-        position: relative;
-        padding-top: 160px;
+        padding-top: 180px; /* Ajustado para logo y barra en pantallas pequeñas */
       }
       .logo-container {
-        position: absolute;
-        top: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 100%;
-        max-height: 200px;
-        z-index: 2;
-        text-align: center;
-        background-color: transparent;
-      }
-      .logo-container img {
-        max-width: 100%;
-        height: auto;
-        object-fit: contain;
-      }
-      main {
-        max-width: 900px;
-        width: 95%;
-        margin: 0 auto;
-        background-color: #fff;
-        border-radius: 16px;
-        padding: 35px 28px;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-        text-align: center;
-        position: relative;
-        z-index: 1;
+        max-height: 120px;
       }
       h2 {
-        font-family: 'Luckiest Guy', cursive;
-        font-size: 40px;
-        margin-bottom: 25px;
-        color: #2b6cb0;
-        letter-spacing: 1px;
+        font-size: 28px;
       }
-      .input-group { margin-bottom: 20px; text-align: left; }
-      label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: bold;
-        color: #2b6cb0;
-        font-size: 18px;
-      }
-      input[type="file"] {
-        padding: 18px;
-        font-size: 18px;
-        width: 100%;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        border: 2px dashed #90cdf4;
-        background-color: #ebf8ff;
-        transition: 0.3s ease;
-      }
-      input[type="file"]:hover {
-        border-color: #2b6cb0;
-        background-color: #e6f0fa;
-      }
-      input[type="text"] {
-        padding: 16px;
-        font-size: 18px;
-        width: 100%;
-        border-radius: 10px;
-        border: 2px solid #90cdf4;
-        background-color: #ebf8ff;
-        margin-bottom: 10px;
-        box-sizing: border-box;
-        transition: 0.3s ease;
-      }
-      input[type="text"]:focus {
-        outline: none;
-        border-color: #2b6cb0;
-        background-color: #e6f0fa;
-      }
-      button {
-        padding: 16px 24px;
-        font-size: 20px;
-        background: linear-gradient(135deg, #2b6cb0, #3182ce);
-        color: white;
-        border: none;
-        border-radius: 12px;
-        cursor: pointer;
-        width: 100%;
-        margin-bottom: 15px;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-        font-weight: bold;
-      }
-      button:hover { background: linear-gradient(135deg, #2c5282, #2b6cb0); transform: scale(1.02); }
-      #progressContainer { width: 100%; margin-top: 20px; display: none; }
-      #progressBar {
-        width: 100%;
-        height: 20px;
-        background-color: #e2e8f0;
-        border-radius: 10px;
-        overflow: hidden;
-      }
-      #progress { height: 100%; width: 0%; background-color: #3182ce; transition: width 0.3s ease; }
-      #status { margin-top: 20px; font-size: 18px; color: #2d3748; font-weight: bold; }
-      .note {
+      input[type="file"], input[type="text"], button {
         font-size: 16px;
-        color: #444;
-        margin-top: 30px;
-        background-color: #edf2f7;
-        padding: 20px;
-        border-radius: 12px;
-        line-height: 1.6;
-        text-align: left;
+        padding: 14px;
       }
-      @media (max-width: 600px) {
-        body { padding-top: 140px; }
-        h2 { font-size: 28px; }
-        input[type="file"], input[type="text"], button { font-size: 16px; padding: 14px; }
-        .note { font-size: 14px; }
-        label { font-size: 16px; }
+      .note {
+        font-size: 14px;
       }
-
-
-      .social-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #222;
-  color: white;
-  padding: 10px 20px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-}
-
-.app-name {
-  font-size: 24px;
-  font-weight: bold;
-}
-
-.nav-icons {
-  display: flex;
-  gap: 15px;
-}
-
-.nav-icons button {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.nav-icons button:hover {
-  color: #1e90ff;
-}
-
-.nav-icons button.active {
-  color: #1e90ff;
-}
-
-body {
-  padding-top: 60px; /* Espacio para el encabezado fijo */
-}
-    </style>
-  </head>
-  <body>
-
-<header class="social-header">
-  <div class="app-name">DECOM</div>
-  <nav class="nav-icons">
-    <button id="publicar-btn" title="Publicar" class="active">
-      <i class="fas fa-plus-circle"></i>
-    </button>
-    <button id="anuncios-btn" title="Anuncios">
-      <i class="fas fa-bullhorn"></i>
-    </button>
-    <button id="videos-btn" title="Videos" >
-      <i class="fas fa-video"></i>
-    </button>
-  </nav>
-</header>
-
-    
-    <div class="logo-container">
-      <img src="logo.png" alt="Logo" />
+      label {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="social-header">
+    <div class="app-name">DECOM</div>
+    <nav class="nav-icons">
+      <button id="publicar-btn" title="Publicar" class="active">
+        <i class="fas fa-plus-circle"></i>
+      </button>
+      <button id="anuncios-btn" title="Anuncios">
+        <i class="fas fa-bullhorn"></i>
+      </button>
+      <button id="videos-btn" title="Videos">
+        <i class="fas fa-video"></i>
+      </button>
+    </nav>
+  </header>
+  <div class="logo-container">
+    <img src="logo.png" alt="Logo">
+  </div>
+  <main>
+    <h2>DECOM BOCHICA SUR</h2>
+    <form id="uploadForm" onsubmit="event.preventDefault(); upload();">
+      <div class="input-group">
+        <label for="videoTitle">Título del video <span style="color: #e53e3e">*</span></label>
+        <input type="text" id="videoTitle" placeholder="Escribe el título del video" maxlength="80" required>
+      </div>
+      <div class="input-group">
+        <label for="videoDescripcion">Descripción del video</label>
+        <input type="text" id="videoDescripcion" placeholder="Agrega una breve descripción" maxlength="200">
+      </div>
+      <input type="file" id="fileInput" accept="video/*" required>
+      <button type="submit">📤 Subir video</button>
+    </form>
+    <div id="progressContainer">
+      <div id="progressBar">
+        <div id="progress"></div>
+      </div>
     </div>
-    <main>
-      <h2>DECOM BOCHICA SUR</h2>
-      <form id="uploadForm" onsubmit="event.preventDefault(); upload();">
-        <div class="input-group">
-          <label for="videoTitle">Título del video <span style="color: #e53e3e">*</span></label>
-          <input type="text" id="videoTitle" placeholder="Escribe el título del video" maxlength="80" required />
-        </div>
-
-        <div class="input-group">
-          <label for="videoDescripcion">Descripción del video</label>
-          <input type="text" id="videoDescripcion" placeholder="Agrega una breve descripción" maxlength="200" />
-        </div>
-
-        <input type="file" id="fileInput" accept="video/*" required />
-        <button type="submit">📤 Subir video</button>
-      </form>
-
-      <div id="progressContainer">
-        <div id="progressBar">
-          <div id="progress"></div>
-        </div>
-      </div>
-      <div id="status"></div>
-
-      <div class="note">
-        🔄 Por favor, espera hasta que el video se suba completamente.<br /><br />
-        📋 La publicación será guardada automáticamente en DECOM.<br /><br />
-        ✅ Luego ve a <strong>“Videos”</strong> en la app para visualizar.<br /><br />
-        Desarrollada por: <strong>DEIMER HERRERA</strong>.
-      </div>
-    </main>
-    <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const qs = new URLSearchParams(location.search);
-  const qName = qs.get("name");
-  const qEmail = qs.get("email");
-  if (qName) localStorage.setItem("autor", qName);
-  if (qEmail) localStorage.setItem("correo", qEmail);
-
-  // Removemos el intento de usar REQUEST_USER_DATA, ya que no es necesario
-  // Si necesitas comunicación con App Inventor, usa un comando válido más adelante
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("publicar-btn").addEventListener("click", () => {
-    navigateTo("https://artisticaipucbochicasur-code.github.io/Subir-Videos/upload.html");
-  });
-  document.getElementById("anuncios-btn").addEventListener("click", () => {
-    navigateTo("https://artisticaipucbochicasur-code.github.io/pase-de-fotos-vertical/fotos.html");
-  });
-  document.getElementById("videos-btn").addEventListener("click", () => {
-    navigateTo("https://artisticaipucbochicasur-code.github.io/slider-de-videos/sliderVideos.html");
-  });
-});
-
-
-      
-function upload() {
-  const file = document.getElementById("fileInput").files[0];
-  const tituloUsuario = document.getElementById("videoTitle").value.trim();
-  const descripcionUsuario = document.getElementById("videoDescripcion").value.trim();
-
-  const params = new URLSearchParams(window.location.search);
-  const autor = params.get("nombre") || "AnónimoDH";
-  const correo = params.get("email") || "decom@bochicasur.edu";
-
-  if (!file) {
-    alert("Selecciona un video primero.");
-    document.getElementById("fileInput").focus();
-    return;
-  }
-
-  if (!tituloUsuario) {
-    alert("Por favor, escribe el título del video.");
-    document.getElementById("videoTitle").focus();
-    return;
-  }
-
-  document.getElementById("status").innerText = "";
-
-  const identifier = "artistica_bochica_" + Date.now();
-  const fileName = file.name;
-  const accessKey = "KPJmAQCm1UyNJWqv";
-  const secretKey = "9JkBrIGexGNOynyf";
-
-  const url = `https://s3.us.archive.org/${identifier}/${fileName}`;
-  const xhr = new XMLHttpRequest();
-
-  xhr.upload.onprogress = function (event) {
-    if (event.lengthComputable) {
-      const percent = (event.loaded / event.total) * 100;
-      document.getElementById("progressContainer").style.display = "block";
-      document.getElementById("progress").style.width = percent + "%";
+    <div id="status"></div>
+    <div class="note">
+      🔄 Por favor, espera hasta que el video se suba completamente.<br><br>
+      📋 La publicación será guardada automáticamente en DECOM.<br><br>
+      ✅ Luego ve a <strong>“Videos”</strong> en la app para visualizar.<br><br>
+      Desarrollada por: <strong>DEIMER HERRERA</strong>.
+    </div>
+  </main>
+  <script>
+    function navigateTo(url) {
+      window.location.href = url;
     }
-  };
 
-  xhr.onload = function () {
-    if (xhr.status === 200) {
-      const fileEncoded = encodeURIComponent(fileName);
-      const directLink = `https://archive.org/download/${identifier}/${fileEncoded}`;
-      document.getElementById("status").innerHTML = `<p>✅ Publicación exitosa.</p>`;
+    document.addEventListener("DOMContentLoaded", () => {
+      const qs = new URLSearchParams(location.search);
+      const qName = qs.get("name");
+      const qEmail = qs.get("email");
+      if (qName) localStorage.setItem("autor", qName);
+      if (qEmail) localStorage.setItem("correo", qEmail);
 
-      fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=guardar&tipo=video'
-        + '&titulo=' + encodeURIComponent(tituloUsuario)
-        + '&link=' + encodeURIComponent(directLink)
-        + '&autor=' + encodeURIComponent(autor)
-        + '&correo=' + encodeURIComponent(correo)
-        + '&descripcion=' + encodeURIComponent(descripcionUsuario), {
-        method: 'GET'
+      document.getElementById("publicar-btn").addEventListener("click", () => {
+        navigateTo("https://artisticaipucbochicasur-code.github.io/Subir-Videos/upload.html");
       });
-    } else {
-      document.getElementById("status").innerText = "❌ Error al subir: " + xhr.responseText;
+      document.getElementById("anuncios-btn").addEventListener("click", () => {
+        navigateTo("https://artisticaipucbochicasur-code.github.io/pase-de-fotos-vertical/fotos.html");
+      });
+      document.getElementById("videos-btn").addEventListener("click", () => {
+        navigateTo("https://artisticaipucbochicasur-code.github.io/slider-de-videos/sliderVideos.html");
+      });
+    });
+
+    function upload() {
+      const file = document.getElementById("fileInput").files[0];
+      const tituloUsuario = document.getElementById("videoTitle").value.trim();
+      const descripcionUsuario = document.getElementById("videoDescripcion").value.trim();
+
+      const params = new URLSearchParams(window.location.search);
+      const autor = params.get("nombre") || localStorage.getItem("autor") || "AnónimoDH";
+      const correo = params.get("email") || localStorage.getItem("correo") || "decom@bochicasur.edu";
+
+      if (!file) {
+        alert("Selecciona un video primero.");
+        document.getElementById("fileInput").focus();
+        return;
+      }
+
+      if (!tituloUsuario) {
+        alert("Por favor, escribe el título del video.");
+        document.getElementById("videoTitle").focus();
+        return;
+      }
+
+      document.getElementById("status").innerText = "";
+
+      const identifier = "artistica_bochica_" + Date.now();
+      const fileName = file.name;
+      const accessKey = "KPJmAQCm1UyNJWqv";
+      const secretKey = "9JkBrIGexGNOynyf";
+
+      const url = `https://s3.us.archive.org/${identifier}/${fileName}`;
+      const xhr = new XMLHttpRequest();
+
+      xhr.upload.onprogress = function (event) {
+        if (event.lengthComputable) {
+          const percent = (event.loaded / event.total) * 100;
+          document.getElementById("progressContainer").style.display = "block";
+          document.getElementById("progress").style.width = percent + "%";
+        }
+      };
+
+      xhr.onload = function () {
+        if (xhr.status === 200) {
+          const fileEncoded = encodeURIComponent(fileName);
+          const directLink = `https://archive.org/download/${identifier}/${fileEncoded}`;
+          document.getElementById("status").innerHTML = `<p>✅ Publicación exitosa.</p>`;
+
+          fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=guardar&tipo=video'
+            + '&titulo=' + encodeURIComponent(tituloUsuario)
+            + '&link=' + encodeURIComponent(directLink)
+            + '&autor=' + encodeURIComponent(autor)
+            + '&correo=' + encodeURIComponent(correo)
+            + '&descripcion=' + encodeURIComponent(descripcionUsuario), {
+            method: 'GET'
+          });
+        } else {
+          document.getElementById("status").innerText = "❌ Error al subir: " + xhr.responseText;
+        }
+      };
+
+      xhr.onerror = function () {
+        document.getElementById("status").innerText = "❌ Error de red al subir el archivo.";
+      };
+
+      xhr.open("PUT", url, true);
+      xhr.setRequestHeader("Authorization", `LOW ${accessKey}:${secretKey}`);
+      xhr.setRequestHeader("x-archive-auto-make-bucket", "1");
+      xhr.setRequestHeader("x-archive-meta-title", fileName);
+      xhr.setRequestHeader("x-archive-meta-mediatype", "movies");
+      xhr.setRequestHeader("x-archive-meta-description", "Video subido desde la app DECOM");
+      xhr.setRequestHeader("x-archive-meta-collection", "opensource_movies");
+      xhr.setRequestHeader("x-archive-meta-creator", "artistica_bochica");
+      xhr.setRequestHeader("Content-Type", file.type);
+
+      xhr.send(file);
     }
-  };
-
-  xhr.onerror = function () {
-    document.getElementById("status").innerText = "❌ Error de red al subir el archivo.";
-  };
-
-  xhr.open("PUT", url, true);
-  xhr.setRequestHeader("Authorization", `LOW ${accessKey}:${secretKey}`);
-  xhr.setRequestHeader("x-archive-auto-make-bucket", "1");
-  xhr.setRequestHeader("x-archive-meta-title", fileName);
-  xhr.setRequestHeader("x-archive-meta-mediatype", "movies");
-  xhr.setRequestHeader("x-archive-meta-description", "Video subido desde la app DECOM");
-  xhr.setRequestHeader("x-archive-meta-collection", "opensource_movies");
-  xhr.setRequestHeader("x-archive-meta-creator", "artistica_bochica");
-  xhr.setRequestHeader("Content-Type", file.type);
-
-  xhr.send(file);
-}
-    </script>
-  </body>
+  </script>
+</body>
 </html>
-
