@@ -6,6 +6,7 @@
     <title>Subir video a DECOM</title>
     <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet" />
     <style>
+      /* ... tus estilos originales, igual ... */
       * { box-sizing: border-box; }
       body { margin: 0; font-family: "Segoe UI", sans-serif; background-color: #f0f4f8; color: #333; position: relative; padding-top: 160px; }
       .logo-container { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-height: 200px; z-index: 2; text-align: center; background-color: transparent; }
@@ -19,9 +20,9 @@
       input[type="text"]:required { border-color: #e53e3e; }
       button { padding: 16px 24px; font-size: 20px; background-color: #2b6cb0; color: white; border: none; border-radius: 10px; cursor: pointer; width: 100%; margin-bottom: 15px; transition: background-color 0.3s ease, transform 0.2s ease; }
       button:hover { background-color: #2c5282; transform: scale(1.02); }
-      #progressContainer { width: 100%; margin-top: 20px; display: none; }
-      #progressBar { width: 100%; height: 20px; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; }
-      #progress { height: 100%; width: 0%; background-color: #3182ce; transition: width 0.3s ease; }
+      #progressContainer { width: 100%; margin-top: 20px; }
+      #progressBar, #compressBar { width: 100%; height: 20px; background-color: #e2e8f0; border-radius: 10px; overflow: hidden; margin-bottom:10px; }
+      #progress, #compressProgress { height: 100%; width: 0%; background-color: #3182ce; transition: width 0.3s ease; }
       #status { margin-top: 20px; font-size: 16px; color: #444; }
       .note { font-size: 16px; color: #555; margin-top: 30px; background-color: #edf2f7; padding: 20px; border-radius: 10px; line-height: 1.6; }
       a { color: #2b6cb0; word-break: break-word; font-size: 14px; }
@@ -34,6 +35,8 @@
         label { font-size: 16px; }
       }
     </style>
+    <!-- ffmpeg.wasm CDN -->
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.5/dist/ffmpeg.min.js"></script>
   </head>
   <body>
     <div class="logo-container">
@@ -46,23 +49,20 @@
           <label for="videoTitle">Título del video <span style="color: #e53e3e">*</span></label>
           <input type="text" id="videoTitle" placeholder="Escribe el título del video" maxlength="80" required />
         </div>
-
         <div class="input-group">
           <label for="videoDescripcion">Descripción del video</label>
           <input type="text" id="videoDescripcion" placeholder="Agrega una breve descripción" maxlength="200" />
         </div>
-
         <input type="file" id="fileInput" accept="video/*" required />
         <button type="submit">📤 Subir video</button>
       </form>
-
-      <div id="progressContainer">
-        <div id="progressBar">
-          <div id="progress"></div>
-        </div>
+      <div id="progressContainer" style="display:none;">
+        <div><b>Compresión:</b></div>
+        <div id="compressBar"><div id="compressProgress"></div></div>
+        <div><b>Subida:</b></div>
+        <div id="progressBar"><div id="progress"></div></div>
       </div>
       <div id="status"></div>
-
       <div class="note">
         🔄 Por favor, espera hasta que el video se suba completamente.<br /><br />
         📋 La publicación será guardada automáticamente en DECOM.<br /><br />
@@ -100,7 +100,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
 let directLink = "";
 
-function upload() {
+async function compressVideo(file, onProgress) {
+  const { createFFmpeg, fetchFile } = FFmpeg;
+  const ffmpeg = createFFmpeg({ log: true, corePath: 'https://unpkg.com/@ffmpeg/core@0.12.5/dist/ffmpeg-core.js' });
+
+  // Carga la instancia de ffmpeg
+  if (!ffmpeg.isLoaded()) {
+    await ffmpeg.load();
+  }
+
+  // Nombre de archivos temporales
+  const inputName = "input." + file.name.split('.').pop();
+  const outputName = "output.mp4";
+
+  ffmpeg.FS('writeFile', inputName, await fetchFile(file));
+
+  // Parámetros de compresión: puedes ajustar a tu gusto, por ejemplo:
+  // -vf scale=iw*0.5:ih*0.5 = reduce resolución a la mitad
+  // -b:v 1000k = bitrate a 1000 kbps
+  // Puedes cambiar los valores según lo que necesites
+  const args = [
+    '-i', inputName,
+    '-vcodec', 'libx264',
+    '-crf', '28', // calidad (más alto = más compresión, mayor pérdida)
+    '-preset', 'veryfast',
+    '-b:v', '1000k',
+    '-vf', 'scale=iw*0.7:ih*0.7', // baja la resolución a 70%
+    '-acodec', 'aac',
+    '-b:a', '128k',
+    outputName
+  ];
+
+  // Progreso de compresión
+  ffmpeg.setProgress(({ ratio }) => {
+    if (typeof onProgress === 'function') {
+      // ratio va de 0 a 1
+      onProgress(Math.round(ratio * 100));
+    }
+  });
+
+  await ffmpeg.run(...args);
+
+  const data = ffmpeg.FS('readFile', outputName);
+  // Devuelve un nuevo File
+  return new File([data.buffer], "comprimido_" + file.name.replace(/\s+/g, '_').replace(/[^a-z0-9_\.\-]/gi, ''), {
+    type: "video/mp4"
+  });
+}
+
+async function upload() {
   const file = document.getElementById("fileInput").files[0];
   const tituloUsuario = document.getElementById("videoTitle").value.trim();
   const descripcionUsuario = document.getElementById("videoDescripcion").value.trim();
@@ -114,7 +162,6 @@ function upload() {
     document.getElementById("fileInput").focus();
     return;
   }
-
   if (!tituloUsuario) {
     alert("Por favor, escribe el título del video.");
     document.getElementById("videoTitle").focus();
@@ -122,19 +169,35 @@ function upload() {
   }
 
   document.getElementById("status").innerText = "";
+  document.getElementById("progressContainer").style.display = "block";
+  document.getElementById("compressProgress").style.width = "0%";
+  document.getElementById("progress").style.width = "0%";
 
+  // 1. Comprimir video
+  document.getElementById("status").innerHTML = "⏳ Comprimiendo video, por favor espera...";
+  let compressedFile;
+  try {
+    compressedFile = await compressVideo(file, percent => {
+      document.getElementById("compressProgress").style.width = percent + "%";
+    });
+    document.getElementById("compressProgress").style.width = "100%";
+    document.getElementById("status").innerHTML = "✅ Compresión terminada. Subiendo video...";
+  } catch (e) {
+    document.getElementById("status").innerText = "❌ Error al comprimir el video: " + e.message;
+    return;
+  }
+
+  // 2. Subir archivo comprimido
   const identifier = "artistica_bochica_" + Date.now();
-  const fileName = file.name;
+  const fileName = compressedFile.name;
   const accessKey = "KPJmAQCm1UyNJWqv";
   const secretKey = "9JkBrIGexGNOynyf";
-
   const url = `https://s3.us.archive.org/${identifier}/${fileName}`;
   const xhr = new XMLHttpRequest();
 
   xhr.upload.onprogress = function (event) {
     if (event.lengthComputable) {
       const percent = (event.loaded / event.total) * 100;
-      document.getElementById("progressContainer").style.display = "block";
       document.getElementById("progress").style.width = percent + "%";
     }
   };
@@ -146,15 +209,12 @@ function upload() {
       document.getElementById("status").innerHTML = `
         <p>✅ Publicación exitosa.</p>
         <a href="${directLink}" target="_blank">🔗 Ver video</a>`;
-
       fetch('https://script.google.com/macros/s/AKfycbwyY6m3H8WD494cnoQbNXwspsZtD1sGu97yio9mk9DTozGSuyo6gHXB1W6HArcpYfP2/exec?accion=guardar&tipo=video'
         + '&titulo=' + encodeURIComponent(tituloUsuario)
         + '&link=' + encodeURIComponent(directLink)
         + '&autor=' + encodeURIComponent(autor)
         + '&correo=' + encodeURIComponent(correo)
-        + '&descripcion=' + encodeURIComponent(descripcionUsuario), {
-        method: 'GET'
-      });
+        + '&descripcion=' + encodeURIComponent(descripcionUsuario), { method: 'GET' });
     } else {
       document.getElementById("status").innerText = "❌ Error al subir: " + xhr.responseText;
     }
@@ -172,9 +232,9 @@ function upload() {
   xhr.setRequestHeader("x-archive-meta-description", "Video subido desde la app DECOM");
   xhr.setRequestHeader("x-archive-meta-collection", "opensource_movies");
   xhr.setRequestHeader("x-archive-meta-creator", "artistica_bochica");
-  xhr.setRequestHeader("Content-Type", file.type);
+  xhr.setRequestHeader("Content-Type", compressedFile.type);
 
-  xhr.send(file);
+  xhr.send(compressedFile);
 }
     </script>
   </body>
