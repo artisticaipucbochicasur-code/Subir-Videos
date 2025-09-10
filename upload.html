@@ -6,7 +6,7 @@
     <title>Subir video a DECOM</title>
     <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet" />
     <style>
-      /* ... tus estilos originales, igual ... */
+      /* ... tus estilos originales ... */
       * { box-sizing: border-box; }
       body { margin: 0; font-family: "Segoe UI", sans-serif; background-color: #f0f4f8; color: #333; position: relative; padding-top: 160px; }
       .logo-container { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 100%; max-height: 200px; z-index: 2; text-align: center; background-color: transparent; }
@@ -100,41 +100,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
 let directLink = "";
 
+// ------------- CAMBIO AQUÍ: window.FFmpeg -------------
 async function compressVideo(file, onProgress) {
-  const { createFFmpeg, fetchFile } = FFmpeg;
+  const { createFFmpeg, fetchFile } = window.FFmpeg;
   const ffmpeg = createFFmpeg({ log: true, corePath: 'https://unpkg.com/@ffmpeg/core@0.12.5/dist/ffmpeg-core.js' });
 
-  // Carga la instancia de ffmpeg
   if (!ffmpeg.isLoaded()) {
     await ffmpeg.load();
   }
 
-  // Nombre de archivos temporales
   const inputName = "input." + file.name.split('.').pop();
   const outputName = "output.mp4";
 
   ffmpeg.FS('writeFile', inputName, await fetchFile(file));
 
-  // Parámetros de compresión: puedes ajustar a tu gusto, por ejemplo:
-  // -vf scale=iw*0.5:ih*0.5 = reduce resolución a la mitad
-  // -b:v 1000k = bitrate a 1000 kbps
-  // Puedes cambiar los valores según lo que necesites
   const args = [
     '-i', inputName,
     '-vcodec', 'libx264',
-    '-crf', '28', // calidad (más alto = más compresión, mayor pérdida)
+    '-crf', '28',
     '-preset', 'veryfast',
     '-b:v', '1000k',
-    '-vf', 'scale=iw*0.7:ih*0.7', // baja la resolución a 70%
+    '-vf', 'scale=iw*0.7:ih*0.7',
     '-acodec', 'aac',
     '-b:a', '128k',
     outputName
   ];
 
-  // Progreso de compresión
   ffmpeg.setProgress(({ ratio }) => {
     if (typeof onProgress === 'function') {
-      // ratio va de 0 a 1
       onProgress(Math.round(ratio * 100));
     }
   });
@@ -142,7 +135,6 @@ async function compressVideo(file, onProgress) {
   await ffmpeg.run(...args);
 
   const data = ffmpeg.FS('readFile', outputName);
-  // Devuelve un nuevo File
   return new File([data.buffer], "comprimido_" + file.name.replace(/\s+/g, '_').replace(/[^a-z0-9_\.\-]/gi, ''), {
     type: "video/mp4"
   });
