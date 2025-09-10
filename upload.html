@@ -24,6 +24,8 @@
       #progress { height: 100%; width: 0%; background-color: #3182ce; transition: width 0.3s ease; }
       #status { margin-top: 20px; font-size: 16px; color: #444; }
       .note { font-size: 16px; color: #555; margin-top: 30px; background-color: #edf2f7; padding: 20px; border-radius: 10px; line-height: 1.6; }
+      .upload-info { margin: 18px 0 32px 0; padding: 15px; background: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: 8px; font-size: 16px; }
+      .upload-metrics { font-size: 15px; color: #2b6cb0; margin-top: 8px; }
       a { color: #2b6cb0; word-break: break-word; font-size: 14px; }
       select { padding: 12px; font-size: 16px; border-radius: 8px; border: 2px solid #90cdf4; margin-bottom: 10px; width: 100%; max-width: 400px; }
       @media (max-width: 600px) {
@@ -32,6 +34,7 @@
         input[type="file"], input[type="text"], button, select { font-size: 16px; padding: 14px; }
         .note { font-size: 14px; }
         label { font-size: 16px; }
+        .upload-info { font-size: 13px; }
       }
     </style>
   </head>
@@ -41,17 +44,25 @@
     </div>
     <main>
       <h2>DECOM BOCHICA SUR</h2>
+
+      <div class="upload-info" id="uploadInfo">
+        <strong>Recomendaciones para subir videos grandes:</strong><br>
+        • Para videos mayores a 100 MB, usa preferiblemente conexión WiFi.<br>
+        • No cierres ni bloquees la pantalla durante la subida.<br>
+        • La velocidad depende de tu internet, puede tardar varios minutos.<br>
+        <b>Tip:</b> Si tu video es muy grande y la subida es lenta, prueba comprimirlo con una app externa como <a href="https://play.google.com/store/apps/details?id=com.pandavideo.compressor" target="_blank">Panda Video Compressor</a> o <a href="https://play.google.com/store/apps/details?id=com.xvideostudio.videoeditor" target="_blank">VidCompact</a> antes de subir.<br>
+        <b>Tamaño máximo recomendado:</b> 200 MB.
+      </div>
+
       <form id="uploadForm" onsubmit="event.preventDefault(); upload();">
         <div class="input-group">
           <label for="videoTitle">Título del video <span style="color: #e53e3e">*</span></label>
           <input type="text" id="videoTitle" placeholder="Escribe el título del video" maxlength="80" required />
         </div>
-
         <div class="input-group">
           <label for="videoDescripcion">Descripción del video</label>
           <input type="text" id="videoDescripcion" placeholder="Agrega una breve descripción" maxlength="200" />
         </div>
-
         <input type="file" id="fileInput" accept="video/*" required />
         <button type="submit">📤 Subir video</button>
       </form>
@@ -60,9 +71,9 @@
         <div id="progressBar">
           <div id="progress"></div>
         </div>
+        <div class="upload-metrics" id="uploadMetrics"></div>
       </div>
       <div id="status"></div>
-
       <div class="note">
         🔄 Por favor, espera hasta que el video se suba completamente.<br /><br />
         📋 La publicación será guardada automáticamente en DECOM.<br /><br />
@@ -100,6 +111,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
 let directLink = "";
 
+function humanFileSize(size) {
+  if (size === 0) return "0 B";
+  const i = Math.floor(Math.log(size) / Math.log(1024));
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  return (size / Math.pow(1024, i)).toFixed(2) + ' ' + sizes[i];
+}
+
 function upload() {
   const file = document.getElementById("fileInput").files[0];
   const tituloUsuario = document.getElementById("videoTitle").value.trim();
@@ -122,20 +140,40 @@ function upload() {
   }
 
   document.getElementById("status").innerText = "";
+  document.getElementById("uploadMetrics").innerText = "";
+  document.getElementById("progress").style.width = "0%";
+  document.getElementById("progressContainer").style.display = "block";
+
+  // Mostrar info de tamaño del video seleccionado
+  document.getElementById("uploadInfo").innerHTML += `<br><b>Video seleccionado:</b> ${file.name} (${humanFileSize(file.size)})`;
 
   const identifier = "artistica_bochica_" + Date.now();
   const fileName = file.name;
   const accessKey = "KPJmAQCm1UyNJWqv";
   const secretKey = "9JkBrIGexGNOynyf";
-
   const url = `https://s3.us.archive.org/${identifier}/${fileName}`;
   const xhr = new XMLHttpRequest();
+
+  let startTime = Date.now();
 
   xhr.upload.onprogress = function (event) {
     if (event.lengthComputable) {
       const percent = (event.loaded / event.total) * 100;
-      document.getElementById("progressContainer").style.display = "block";
       document.getElementById("progress").style.width = percent + "%";
+
+      // Mostrar progreso en MB y velocidad estimada
+      const loadedMB = (event.loaded / (1024 * 1024)).toFixed(2);
+      const totalMB = (event.total / (1024 * 1024)).toFixed(2);
+      const elapsed = (Date.now() - startTime) / 1000;
+      const speed = event.loaded / elapsed; // bytes/seg
+      const speedMB = (speed / (1024 * 1024)).toFixed(2);
+      let timeLeft = ((event.total - event.loaded) / speed);
+      if (!isFinite(timeLeft)) timeLeft = 0;
+      const mins = Math.floor(timeLeft / 60);
+      const secs = Math.floor(timeLeft % 60);
+
+      document.getElementById("uploadMetrics").innerText =
+        `Subido: ${loadedMB} MB / ${totalMB} MB  —  Velocidad: ${speedMB} MB/s  —  Restante: ${mins}m ${secs}s`;
     }
   };
 
@@ -155,13 +193,17 @@ function upload() {
         + '&descripcion=' + encodeURIComponent(descripcionUsuario), {
         method: 'GET'
       });
+      document.getElementById("uploadMetrics").innerText = "";
+      document.getElementById("progressContainer").style.display = "none";
     } else {
       document.getElementById("status").innerText = "❌ Error al subir: " + xhr.responseText;
+      document.getElementById("uploadMetrics").innerText = "";
     }
   };
 
   xhr.onerror = function () {
     document.getElementById("status").innerText = "❌ Error de red al subir el archivo.";
+    document.getElementById("uploadMetrics").innerText = "";
   };
 
   xhr.open("PUT", url, true);
